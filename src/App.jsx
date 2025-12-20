@@ -19,8 +19,8 @@ const App = () => {
         {/* Trang Solar: /solar */}
         <Route path="/solar" element={<SolarPage />} />
 
-        {/* Trang Sự Cố: /su-co (Hiện chưa có file nên comment lại để không lỗi) */}
-        {/* <Route path="/su-co" element={<SuCoPage />} /> */}
+        {/* Trang Sự Cố: /su-co */}
+        <Route path="/su-co" element={<SuCoPage />} />
 
         {/* Trang lỗi 404 */}
         <Route path="*" element={<div className="p-10 text-center font-bold">404 - Trang không tồn tại</div>} />
