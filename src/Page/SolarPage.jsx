@@ -1,3 +1,4 @@
+import React from 'react';
 import ChecklistApp from '../components/ChecklistApp';
 
 // Import ảnh mẫu
