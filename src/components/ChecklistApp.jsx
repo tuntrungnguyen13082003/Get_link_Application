@@ -73,7 +73,7 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
     try {
       const now = new Date();
       const datePrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-      const finalCode = (realCode || "Unknown").trim(); 
+      const finalCode = String(realCode || "Unknown").trim(); 
       // Dùng props reportName
       const zipFileName = `${datePrefix}_${reportName}_${finalCode}.zip`;
       
