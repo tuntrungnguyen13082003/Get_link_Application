@@ -28,11 +28,11 @@ const NotFoundPage = () => {
         </h1>
 
         <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-4">
-          Úi! Lạc đường rồi...
+          Không tìm thấy trang yêu cầu
         </h2>
         
         <p className="text-slate-500 mb-8 text-lg">
-          Trang bạn đang tìm không tồn tại hoặc đã bị "người ngoài hành tinh" bắt cóc mất rồi. 🛸
+          Đường dẫn bạn truy cập có thể đã bị thay đổi hoặc không tồn tại trong hệ thống báo cáo.
         </p>
 
         {/* Nút bấm quay về */}
