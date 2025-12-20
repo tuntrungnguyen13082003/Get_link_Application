@@ -42,7 +42,7 @@ const AdminPage = () => {
     if (username === ADMIN_USER && password === ADMIN_PASS) {
       setIsLoggedIn(true);
     } else {
-      alert("❌ Sai tài khoản hoặc mật khẩu!");
+      alert("❌ Incorrect account or password!");
     }
   };
 
