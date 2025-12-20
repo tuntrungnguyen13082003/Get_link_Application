@@ -157,9 +157,10 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
   const hasCaptured = !!userImages[currentQ.id];
   const isLastStep = currentStep === questions.length - 1;
 
-  return (
+return (
     <div className="min-h-screen bg-gray-100 font-sans text-gray-800 flex justify-center items-start pt-0 md:pt-10 pb-0 md:pb-10">
       
+      {/* Màn hình Loading khi đang gửi */}
       {isUploading && (
         <div className="fixed inset-0 bg-black/80 z-[60] flex flex-col items-center justify-center text-white backdrop-blur-sm">
             <RefreshCw className="w-16 h-16 animate-spin mb-4 text-blue-400"/>
@@ -169,6 +170,7 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
 
       <div className="w-full max-w-md bg-white md:rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[100vh] md:h-[90vh] relative border border-gray-200">
         
+        {/* --- HEADER (Tiêu đề & Thanh tiến trình) --- */}
         <div className="bg-white px-6 py-4 border-b border-gray-100 z-20">
             <div className="flex items-center justify-between mb-3">
                 <h2 className="font-bold text-gray-800 text-lg truncate pr-2">
@@ -178,23 +180,26 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
                     {hasCaptured ? 'Đã xong' : 'Chưa chụp'}
                 </span>
             </div>
+            {/* Thanh tiến trình */}
             <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
                 <div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}></div>
             </div>
         </div>
-<div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+
+        {/* --- BODY (Nội dung chính) --- */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+            
+            {/* 1. KHUNG ẢNH MẪU & MÔ TẢ (Phần bị thiếu trong code của bạn) */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                 <p className="text-gray-700 text-sm mb-3 font-medium">{currentQ.desc}</p>
                 
-                {/* --- KHỐI HIỂN THỊ ẢNH THÔNG MINH (Mới) --- */}
+                {/* Logic hiển thị ảnh mẫu (Hỗ trợ 1 ảnh hoặc nhiều ảnh) */}
                 <div className="bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative group">
-                    
                     {Array.isArray(currentQ.refImage) ? (
-                        // Trường hợp nhiều ảnh: Tạo thanh trượt ngang
                         <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide">
                             {currentQ.refImage.map((img, index) => (
                                 <div key={index} className="w-full flex-shrink-0 snap-center relative">
                                     <img src={img} alt={`Ref ${index}`} className="w-full h-48 object-contain bg-gray-200"/>
-                                    {/* Đánh số trang ảnh (VD: 1/2) */}
                                     <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">
                                         {index + 1}/{currentQ.refImage.length}
                                     </div>
@@ -202,26 +207,23 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
                             ))}
                         </div>
                     ) : (
-                        // Trường hợp 1 ảnh hoặc không có ảnh
                         currentQ.refImage ? (
                             <img src={currentQ.refImage} alt="Ref" className="w-full h-48 object-contain bg-gray-200"/>
                         ) : (
                             <div className="w-full h-48 flex items-center justify-center text-gray-400 text-sm">Chưa có ảnh mẫu</div>
                         )
                     )}
-
                 </div>
-                {/* ------------------------------------------ */}
                 
                 <p className="text-center text-xs text-gray-400 mt-2 italic">
                     {Array.isArray(currentQ.refImage) ? "Vuốt sang để xem thêm ảnh mẫu" : "Ảnh mẫu tham khảo"}
                 </p>
             </div>
 
+            {/* 2. KHUNG CHỤP ẢNH THỰC TẾ */}
             <div className="flex flex-col gap-2">
                 <label className="block text-sm font-bold text-gray-700 ml-1">Ảnh thực tế:</label>
                 <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-sm bg-white border-2 border-dashed border-blue-200 hover:border-blue-400 transition-colors group">
-                    
                     {hasCaptured ? (
                         <>
                             <img src={userImages[currentQ.id]} alt="Captured" className="w-full h-full object-cover" />
@@ -244,6 +246,7 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
             </div>
         </div>
 
+        {/* --- FOOTER (Nút điều hướng) --- */}
         <div className="bg-white p-4 border-t border-gray-200 z-30">
             <div className="flex gap-3">
             <button onClick={() => setCurrentStep(Math.max(0, currentStep - 1))} disabled={currentStep === 0 || isUploading} className="px-4 py-3 rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30">
