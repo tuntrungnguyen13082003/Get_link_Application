@@ -1,0 +1,191 @@
+import React, { useState, useEffect } from 'react';
+import { Camera, ChevronRight, ChevronLeft, Upload, RefreshCw, X, Loader } from 'lucide-react';
+import JSZip from 'jszip';
+
+// Import ảnh mẫu
+import anhminhhoa1 from '../assets/Solar/Ref_1.jpg';
+import anhminhhoa2 from '../assets/Solar/Ref_2.jpg';
+import anhminhhoa3 from '../assets/Solar/Ref_3.jpg';
+import anhminhhoa4 from '../assets/Solar/Ref_4.jpg';
+import anhminhhoa5 from '../assets/Solar/Ref_5.jpg';
+
+const QUESTIONS = [
+  { id: 1, title: "1. Ảnh tổng quan Inverter, Tủ AC Solar", desc: "Có bị chất đồ dễ gây cháy không?", refImage: anhminhhoa1 },
+  { id: 2, title: "2. Ảnh các đầu MC4 ở tủ AC", desc: "Có bị biến dạng không? (Chảy nhựa,...)", refImage: anhminhhoa2 },
+  { id: 3, title: "3. Ảnh các đầu MC4 ở Inverter", desc: "Có bị biến dạng không? (chảy nhựa,...)", refImage: anhminhhoa3 },
+  { id: 4, title: "4. Ảnh mở cửa tủ AC Solar", desc: "Chụp ảnh trong tủ AC Solar", refImage: anhminhhoa4 },
+  { id: 5, title: "5. Ảnh đấu nối Solar và tủ MSB Cửa hàng", desc: "Phần đấu nối có khả năng phát nhiệt không?", refImage: anhminhhoa5 },
+];
+
+const SolarPage = () => {
+  const [currentStep, setCurrentStep] = useState(0); 
+  const [userImages, setUserImages] = useState({});
+  const [isUploading, setIsUploading] = useState(false);
+  
+  const [isCheckingCode, setIsCheckingCode] = useState(true); 
+  const [sessionStatus, setSessionStatus] = useState("checking"); 
+  const [realCode, setRealCode] = useState(""); // Lưu mã thật (SUCO-MAY-1)
+
+  // Lấy Token Fake từ URL
+  const queryParams = new URLSearchParams(window.location.search);
+  const fakeTokenFromUrl = queryParams.get("code"); 
+
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxiHfxLHOBwADHixZk5QerQFVyPFNqwfXqqfwAoskYMdjQs97pON-K-mVA-EjiNRWbeVA/exec"; 
+
+  // --- 1. CHECK MÃ FAKE -> LẤY MÃ REAL ---
+  useEffect(() => {
+    const checkTokenStatus = async () => {
+      if (!fakeTokenFromUrl) {
+        setSessionStatus("invalid");
+        setIsCheckingCode(false);
+        return;
+      }
+      try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({
+             action: "check_status", 
+             token: fakeTokenFromUrl, 
+             sheet_name: "SOLAR"
+          })
+        });
+        const data = await response.json();
+        
+        setSessionStatus(data.result); 
+        if (data.realCode) {
+            setRealCode(data.realCode); // Lưu mã thật
+        }
+      } catch (error) {
+        setSessionStatus("error");
+      } finally {
+        setIsCheckingCode(false);
+      }
+    };
+    checkTokenStatus();
+  }, [fakeTokenFromUrl]);
+
+
+  // --- CÁC HÀM XỬ LÝ ẢNH ---
+  const handleImageCapture = (e, questionId) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => setUserImages(prev => ({ ...prev, [questionId]: event.target.result }));
+      reader.readAsDataURL(file);
+    }
+    e.target.value = '';
+  };
+
+  const removeImage = (questionId) => {
+    if (window.confirm("Xóa ảnh này?")) {
+      const newImages = { ...userImages };
+      delete newImages[questionId];
+      setUserImages(newImages);
+    }
+  };
+
+  // --- 2. GỬI BÁO CÁO (DÙNG MÃ REAL) ---
+  const uploadReport = async () => {
+    if (Object.keys(userImages).length === 0 && !window.confirm("Gửi báo cáo rỗng?")) return;
+    setIsUploading(true);
+    
+    try {
+      const now = new Date();
+      const datePrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+      
+      // Dùng mã Real để đặt tên file
+      const finalCode = (realCode || "Unknown").trim(); 
+      const zipFileName = `${datePrefix}_SolarCheckListEvent_${finalCode}.zip`;
+      
+      const zip = new JSZip();
+      const imgFolder = zip.folder(`SolarCheckListEvent_${finalCode}`);
+      QUESTIONS.forEach(q => {
+        if (userImages[q.id]) imgFolder.file(`${q.id}.jpg`, userImages[q.id].split(',')[1], { base64: true });
+      });
+      const content = await zip.generateAsync({ type: "base64" });
+      
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            filename: zipFileName, 
+            fileData: content,
+            token: finalCode, // Gửi mã Real để server check cột A
+            sheet_name: "SOLAR"
+        })
+      });
+
+      const result = await response.json();
+      if (result.status === 'success') {
+          alert("✅ Báo cáo đã gửi thành công!");
+          setSessionStatus("used");
+      } else throw new Error(result.message);
+
+    } catch (error) {
+      alert("❌ Lỗi: " + error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleNextOrSubmit = () => {
+      const isLastStep = currentStep === QUESTIONS.length - 1;
+      if (isLastStep) uploadReport();
+      else setCurrentStep(currentStep + 1);
+  };
+
+  // --- GIAO DIỆN CHỜ/LỖI ---
+  if (isCheckingCode) return <div className="min-h-screen flex items-center justify-center"><Loader className="animate-spin text-blue-600"/></div>;
+  if (sessionStatus !== "active") return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{sessionStatus === "used" ? "Mã này đã sử dụng!" : "Mã không hợp lệ!"}</div>;
+
+  // --- GIAO DIỆN CHÍNH ---
+  const currentQ = QUESTIONS[currentStep];
+  const hasCaptured = !!userImages[currentQ.id];
+  const isLastStep = currentStep === QUESTIONS.length - 1;
+
+  return (
+    <div className="min-h-screen bg-gray-100 font-sans text-gray-800 flex justify-center items-start pt-0 md:pt-10 pb-0 md:pb-10">
+      {isUploading && (
+        <div className="fixed inset-0 bg-black/80 z-[60] flex flex-col items-center justify-center text-white backdrop-blur-sm">
+           <RefreshCw className="w-16 h-16 animate-spin mb-4 text-blue-400"/>
+           <p className="text-xl font-bold">Đang gửi báo cáo...</p>
+        </div>
+      )}
+      <div className="w-full max-w-md bg-white md:rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[100vh] md:h-[90vh] relative border border-gray-200">
+        <div className="bg-white px-6 py-4 border-b border-gray-100 z-20">
+            <h2 className="font-bold text-gray-800 text-lg truncate mb-3">Câu {currentStep + 1}: {currentQ.title}</h2>
+            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${((currentStep + 1) / QUESTIONS.length) * 100}%` }}></div>
+            </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                <p className="text-gray-700 text-sm mb-3 font-medium">{currentQ.desc}</p>
+                <img src={currentQ.refImage} alt="Ref" className="w-full h-48 object-contain bg-gray-200 rounded-xl"/>
+            </div>
+            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-sm bg-white border-2 border-dashed border-blue-200 hover:border-blue-400 group">
+                {hasCaptured ? (
+                    <>
+                        <img src={userImages[currentQ.id]} alt="Captured" className="w-full h-full object-cover" />
+                        <button onClick={() => removeImage(currentQ.id)} className="absolute top-2 right-2 bg-white/90 text-red-500 p-2 rounded-full"><X size={20} /></button>
+                    </>
+                ) : (
+                    <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
+                        <Camera size={32} className="text-blue-500 mb-2" />
+                        <span className="font-bold text-blue-600 text-sm">Bấm để chụp ảnh</span>
+                        <input type="file" accept="image/*" capture="environment" onChange={(e) => handleImageCapture(e, currentQ.id)} className="hidden" />
+                    </label>
+                )}
+            </div>
+        </div>
+        <div className="bg-white p-4 border-t border-gray-200 z-30 flex gap-3">
+            <button onClick={() => setCurrentStep(Math.max(0, currentStep - 1))} disabled={currentStep === 0 || isUploading} className="px-4 py-3 rounded-xl border border-gray-200 text-gray-500"><ChevronLeft size={24} /></button>
+            <button onClick={handleNextOrSubmit} disabled={isUploading} className={`flex-1 py-3 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 ${isLastStep ? 'bg-green-600' : 'bg-blue-600'}`}>
+                {isLastStep ? <><Upload size={20}/> GỬI BÁO CÁO</> : <>Tiếp theo <ChevronRight size={20}/></>}
+            </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SolarPage;
