@@ -230,7 +230,6 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
             </button>
             </div>
         </div>
-
       </div>
     </div>
   );
