@@ -2,6 +2,11 @@ import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import ChecklistApp from '../components/ChecklistApp';
 
+import anhminhhoa1 from '../assets/Solar/Ref_1.jpg';
+import anhminhhoa2 from '../assets/Solar/Ref_2.jpg';
+import anhminhhoa3 from '../assets/Solar/Ref_3.jpg';
+import anhminhhoa4 from '../assets/Solar/Ref_4.jpg';
+import anhminhhoa5 from '../assets/Solar/Ref_5.jpg';
 // --- PHẦN 1: KHO DỮ LIỆU (CONFIG) ---
 // Bạn gom hết cấu hình Solar, Sự Cố vào đây
 // Lưu ý: Export nó ra để AdminPage còn lấy được tên và link
