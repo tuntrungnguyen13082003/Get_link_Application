@@ -1,7 +1,3 @@
-// import React, { useState, useEffect } from 'react';
-// import { Camera, ChevronRight, ChevronLeft, Upload, RefreshCw, X, Loader } from 'lucide-react';
-// import JSZip from 'jszip';
-
 import ChecklistApp from '../components/ChecklistApp';
 
 // Import ảnh mẫu
