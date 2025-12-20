@@ -145,7 +145,7 @@ const AdminPage = () => {
           {selectedApp && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-300">
               <label className="block text-sm font-bold text-slate-700 mb-2">2. NHẬP MÃ ({selectedApp.sheetName})</label>
-              <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder="VD: SUCO-MAY-A" className="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-xl outline-none focus:border-blue-500 text-lg font-bold uppercase"/>
+              <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder="VD: MAY-A-NGAY-B" className="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-xl outline-none focus:border-blue-500 text-lg font-bold uppercase"/>
               <button onClick={handleCreateLink} disabled={isLoading || !code} className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
                 {isLoading ? "⏳ ĐANG XỬ LÝ..." : "🚀 TẠO LINK NGAY"}
               </button>
