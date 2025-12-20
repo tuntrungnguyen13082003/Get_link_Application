@@ -21,7 +21,7 @@ const QUESTIONS = [
 
 const SolarPage = () => {
   return (
-    <ChecklistApp 
+    <ChecklistApp
       sheetName="SOLAR" 
       reportName="SolarCheckListEvent" 
       questions={SOLAR_QUESTIONS} 
