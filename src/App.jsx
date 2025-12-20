@@ -15,16 +15,16 @@ const App = () => {
         <Route path="/" element={<Navigate to="/admin" replace />} />
 
         {/* Trang Admin: /admin */}
-        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin" element={<AdminPage/>} />
 
         {/* Trang Solar: /solar */}
-        <Route path="/solar" element={<SolarPage />} />
+        <Route path="/solar" element={<SolarPage/>} />
 
         {/* Trang Sự Cố: /su-co */}
-        <Route path="/su-co" element={<SuCoPage  />} />
+        <Route path="/su-co" element={<SuCoPage />} />
 
         {/* Trang lỗi 404 */}
-        <Route path="*" element={<NotFoundPage   />} />
+        <Route path="*" element={<NotFoundPage  />} />
 
       </Routes>
     </BrowserRouter>
