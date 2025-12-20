@@ -8,6 +8,8 @@ import anhminhhoa2 from '../assets/Solar/Ref_2.jpg';
 import anhminhhoa3 from '../assets/Solar/Ref_3.jpg';
 import anhminhhoa4 from '../assets/Solar/Ref_4.jpg';
 import anhminhhoa5 from '../assets/Solar/Ref_5.jpg';
+const SHEET_NAME = "SOLAR";
+const REPORT_NAME = "SolarCheckListEvent";
 
 const QUESTIONS = [
   { id: 1, title: "Ảnh tổng quan Inverter, Tủ AC Solar", desc: "Có bị chất đồ dễ gây cháy không?", refImage: anhminhhoa1 },
@@ -17,7 +19,7 @@ const QUESTIONS = [
   { id: 5, title: "Ảnh đấu nối Solar và tủ MSB Cửa hàng", desc: "Phần đấu nối có khả năng phát nhiệt không?", refImage: anhminhhoa5 },
 ];
 
-const SolarPage = () => {
+const Page = () => {
   const [currentStep, setCurrentStep] = useState(0); 
   const [userImages, setUserImages] = useState({});
   const [isUploading, setIsUploading] = useState(false);
@@ -46,7 +48,7 @@ const SolarPage = () => {
           body: JSON.stringify({
              action: "check_status", 
              token: fakeTokenFromUrl, 
-             sheet_name: "SOLAR"
+             sheet_name: SHEET_NAME
           })
         });
         const data = await response.json();
@@ -95,10 +97,10 @@ const SolarPage = () => {
       
       // Dùng mã Real để đặt tên file
       const finalCode = (realCode || "Unknown").trim(); 
-      const zipFileName = `${datePrefix}_SolarCheckListEvent_${finalCode}.zip`;
+      const zipFileName = `${datePrefix}_${REPORT_NAME}_${finalCode}.zip`;
       
       const zip = new JSZip();
-      const imgFolder = zip.folder(`SolarCheckListEvent_${finalCode}`);
+      const imgFolder = zip.folder(`${REPORT_NAME}_${finalCode}`);
       QUESTIONS.forEach(q => {
         if (userImages[q.id]) imgFolder.file(`${q.id}.jpg`, userImages[q.id].split(',')[1], { base64: true });
       });
@@ -110,7 +112,7 @@ const SolarPage = () => {
             filename: zipFileName, 
             fileData: content,
             token: finalCode, // Gửi mã Real để server check cột A
-            sheet_name: "SOLAR"
+            sheet_name: SHEET_NAME
         })
       });
 
