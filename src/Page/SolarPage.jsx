@@ -255,4 +255,4 @@ const Page = () => {
   );
 };
 
-export default SolarPage;
+export default Page;
