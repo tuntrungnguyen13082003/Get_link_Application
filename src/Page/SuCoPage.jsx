@@ -24,5 +24,4 @@ const SuCoPage = () => {
     />
   );
 };
-
 export default SuCoPage;
