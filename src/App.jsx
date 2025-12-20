@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AdminPage from './Page/AdminPage';
 import SolarPage from './Page/SolarPage';
 import SuCoPage from './Page/SuCoPage'; // Khi nào làm xong file SuCoPage thì mở comment này ra
-import NotFoundPage from './pages/NotFoundPage';
+import NotFoundPage from './Page/NotFoundPage';
 
 const App = () => {
   return (
