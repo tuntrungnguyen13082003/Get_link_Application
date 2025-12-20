@@ -21,7 +21,7 @@ const AdminPage = () => {
     { 
       id: 'su_co', 
       name: '⚠️ Xử lý sự cố', 
-      url: `${CURRENT_DOMAIN}/su_co`, 
+      url: `${CURRENT_DOMAIN}/su-co`, 
       sheetName: 'SU_CO' 
     },
     // Sau này có thêm kho thì thêm vào đây: url: `${CURRENT_DOMAIN}/kho`
