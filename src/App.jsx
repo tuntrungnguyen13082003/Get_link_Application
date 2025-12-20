@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 // Import các trang
 import AdminPage from './Page/AdminPage';
 import SolarPage from './Page/SolarPage';
-import SuCoPage from './pages/SuCoPage'; // Khi nào làm xong file SuCoPage thì mở comment này ra
+import SuCoPage from './Page/SuCoPage'; // Khi nào làm xong file SuCoPage thì mở comment này ra
 
 const App = () => {
   return (
