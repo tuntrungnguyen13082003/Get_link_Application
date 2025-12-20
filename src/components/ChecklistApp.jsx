@@ -182,15 +182,40 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
                 <div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}></div>
             </div>
         </div>
-
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-            
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+<div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                 <p className="text-gray-700 text-sm mb-3 font-medium">{currentQ.desc}</p>
-                <div className="bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
-                     <img src={currentQ.refImage} alt="Ref" className="w-full h-48 object-contain bg-gray-200"/>
+                
+                {/* --- KHỐI HIỂN THỊ ẢNH THÔNG MINH (Mới) --- */}
+                <div className="bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative group">
+                    
+                    {Array.isArray(currentQ.refImage) ? (
+                        // Trường hợp nhiều ảnh: Tạo thanh trượt ngang
+                        <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide">
+                            {currentQ.refImage.map((img, index) => (
+                                <div key={index} className="w-full flex-shrink-0 snap-center relative">
+                                    <img src={img} alt={`Ref ${index}`} className="w-full h-48 object-contain bg-gray-200"/>
+                                    {/* Đánh số trang ảnh (VD: 1/2) */}
+                                    <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">
+                                        {index + 1}/{currentQ.refImage.length}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        // Trường hợp 1 ảnh hoặc không có ảnh
+                        currentQ.refImage ? (
+                            <img src={currentQ.refImage} alt="Ref" className="w-full h-48 object-contain bg-gray-200"/>
+                        ) : (
+                            <div className="w-full h-48 flex items-center justify-center text-gray-400 text-sm">Chưa có ảnh mẫu</div>
+                        )
+                    )}
+
                 </div>
-                <p className="text-center text-xs text-gray-400 mt-2 italic">Ảnh mẫu tham khảo</p>
+                {/* ------------------------------------------ */}
+                
+                <p className="text-center text-xs text-gray-400 mt-2 italic">
+                    {Array.isArray(currentQ.refImage) ? "Vuốt sang để xem thêm ảnh mẫu" : "Ảnh mẫu tham khảo"}
+                </p>
             </div>
 
             <div className="flex flex-col gap-2">
