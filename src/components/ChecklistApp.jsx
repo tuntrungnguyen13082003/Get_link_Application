@@ -189,34 +189,43 @@ return (
         {/* --- BODY (Nội dung chính) --- */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
             
-            {/* 1. KHUNG ẢNH MẪU & MÔ TẢ (Phần bị thiếu trong code của bạn) */}
+            {/* 1. KHUNG ẢNH MẪU & MÔ TẢ */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                 <p className="text-gray-700 text-sm mb-3 font-medium">{currentQ.desc}</p>
                 
-                {/* Logic hiển thị ảnh mẫu (Hỗ trợ 1 ảnh hoặc nhiều ảnh) */}
-                <div className="bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative group">
+                {/* LOGIC MỚI: TỰ ĐỘNG CHIA CỘT (GRID/FLEX) */}
+                <div className="bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative group h-48"> {/* Đặt chiều cao cố định h-48 cho khung */}
+                    
                     {Array.isArray(currentQ.refImage) ? (
-                        <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide">
+                        // TRƯỜNG HỢP NHIỀU ẢNH: Dùng Flexbox để chia đều
+                        <div className="flex w-full h-full gap-1"> {/* gap-1 để tạo khe hở nhỏ giữa các ảnh */}
                             {currentQ.refImage.map((img, index) => (
-                                <div key={index} className="w-full flex-shrink-0 snap-center relative">
-                                    <img src={img} alt={`Ref ${index}`} className="w-full h-48 object-contain bg-gray-200"/>
-                                    <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">
-                                        {index + 1}/{currentQ.refImage.length}
+                                <div key={index} className="flex-1 h-full relative cursor-pointer group/img">
+                                    {/* flex-1: Tự động co giãn bằng nhau */}
+                                    <img 
+                                        src={img} 
+                                        alt={`Ref ${index}`} 
+                                        className="w-full h-full object-contain bg-gray-200 hover:scale-105 transition-transform duration-300" 
+                                    />
+                                    {/* Số thứ tự nhỏ xíu ở góc để biết ảnh nào là ảnh nào */}
+                                    <div className="absolute bottom-1 right-1 bg-black/40 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
+                                        {index + 1}
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
+                        // TRƯỜNG HỢP 1 ẢNH: Hiển thị full như cũ
                         currentQ.refImage ? (
-                            <img src={currentQ.refImage} alt="Ref" className="w-full h-48 object-contain bg-gray-200"/>
+                            <img src={currentQ.refImage} alt="Ref" className="w-full h-full object-contain bg-gray-200"/>
                         ) : (
-                            <div className="w-full h-48 flex items-center justify-center text-gray-400 text-sm">Chưa có ảnh mẫu</div>
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">Chưa có ảnh mẫu</div>
                         )
                     )}
                 </div>
                 
                 <p className="text-center text-xs text-gray-400 mt-2 italic">
-                    {Array.isArray(currentQ.refImage) ? "Vuốt sang để xem thêm ảnh mẫu" : "Ảnh mẫu tham khảo"}
+                    {Array.isArray(currentQ.refImage) ? "Nhấn vào ảnh để xem rõ hơn" : "Ảnh mẫu tham khảo"}
                 </p>
             </div>
 
