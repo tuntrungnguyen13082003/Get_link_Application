@@ -153,9 +153,9 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
   }
 
   // --- GIAO DIỆN CHÍNH (CHỈ HIỆN KHI status === "active") ---
-  const currentQ = QUESTIONS[currentStep];
+  const currentQ = questions[currentStep];
   const hasCaptured = !!userImages[currentQ.id];
-  const isLastStep = currentStep === QUESTIONS.length - 1;
+  const isLastStep = currentStep === questions.length - 1;
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans text-gray-800 flex justify-center items-start pt-0 md:pt-10 pb-0 md:pb-10">
@@ -179,7 +179,7 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
                 </span>
             </div>
             <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${((currentStep + 1) / QUESTIONS.length) * 100}%` }}></div>
+                <div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}></div>
             </div>
         </div>
 
