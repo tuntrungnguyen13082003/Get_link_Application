@@ -20,9 +20,9 @@ const QUESTIONS = [
 const SolarPage = () => {
   return (
     <ChecklistApp
-      sheetName= "SOLAR" 
-      reportName= "SolarCheckListEvent" 
-      questions={QUESTIONS} 
+      sheetName={SHEET_NAME}
+      reportName={REPORT_NAME}
+      questions={QUESTIONS}
     />
   );
 };
