@@ -3,32 +3,22 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Import các trang
 import AdminPage from './Page/AdminPage';
-import SolarPage from './Page/SolarPage';
-import SuCoPage from './Page/SuCoPage'; // Khi nào làm xong file SuCoPage thì mở comment này ra
+import ChecklistPage from './Page/ChecklistPage';
 import NotFoundPage from './Page/NotFoundPage';
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Mặc định vào Admin */}
         <Route path="/" element={<Navigate to="/admin" replace />} />
+        <Route path="/admin" element={<AdminPage />} />
+        
+        {/* DÒNG QUAN TRỌNG: :appId là biến động */}
+        <Route path="/report/:appId" element={<ChecklistPage />} />
 
-        {/* Trang Admin: /admin */}
-        <Route path="/admin" element={<AdminPage/>} />
-
-        {/* Trang Solar: /solar */}
-        <Route path="/solar" element={<SolarPage/>} />
-
-        {/* Trang Sự Cố: /su-co */}
-        <Route path="/su-co" element={<SuCoPage />} />
-
-        {/* Trang lỗi 404 */}
-        <Route path="*" element={<NotFoundPage  />} />
-
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );
 };
-
 export default App;

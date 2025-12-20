@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, User, Key, LogIn, LogOut } from 'lucide-react';
+import { APP_DATA } from './ChecklistPage';
+
 
 const AdminPage = () => {
   // --- CẤU HÌNH ---
@@ -11,21 +13,13 @@ const AdminPage = () => {
   // Tự động lấy tên miền 
   const CURRENT_DOMAIN = window.location.origin;
 
-  const AVAILABLE_APPS = [
-    { 
-      id: 'solar', 
-      name: '📸 Báo cáo Solar', 
-      url: `${CURRENT_DOMAIN}/solar`, // Tự ghép thành .../solar
-      sheetName: 'SOLAR' 
-    },
-    { 
-      id: 'su_co', 
-      name: '⚠️ Xử lý sự cố', 
-      url: `${CURRENT_DOMAIN}/su-co`, 
-      sheetName: 'SU_CO' 
-    },
-    // Sau này có thêm kho thì thêm vào đây: url: `${CURRENT_DOMAIN}/kho`
-  ];
+  const AVAILABLE_APPS = Object.values(APP_DATA).map(app => ({
+    id: app.id,
+    name: app.name,
+    sheetName: app.sheetName,
+    // Tự động ghép link: domain hiện tại + /report/ + id của app
+    url: `${window.location.origin}/report/${app.id}`
+}));
 
   // --- STATE ---
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -85,9 +79,13 @@ const AdminPage = () => {
       if (result.status === 'success') {
         setGeneratedLink(finalLink);
         alert(`✅ Đã tạo mã thành công`);
+        
         navigator.clipboard.writeText(finalLink).then(() => {
-          alert("Đã copy!");
+             // không cần alert cũng được vì giao diện đã báo "Đã tự động copy"
+        }).catch(err => {
+             console.error('Không thể tự động copy:', err);
         });
+
       } else {
         alert("Lỗi Sheet: " + result.message);
       }
