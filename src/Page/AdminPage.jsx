@@ -13,7 +13,7 @@ const AdminPage = () => {
   useEffect(() => {
     document.title = "Get Link System"; // Đổi tên tab thành Get Link
   }, []);
-  
+
   // Tự động lấy tên miền 
   const CURRENT_DOMAIN = window.location.origin;
 
@@ -22,7 +22,7 @@ const AdminPage = () => {
     name: app.name,
     sheetName: app.sheetName,
     // Tự động ghép link: domain hiện tại + /report/ + id của app
-    url: `${window.location.origin}/Checklist/${app.id}`
+    url: `${window.location.origin}/report/${app.id}`
 }));
 
   // --- STATE ---
