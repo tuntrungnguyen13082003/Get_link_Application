@@ -14,7 +14,7 @@ const App = () => {
         <Route path="/admin" element={<AdminPage />} />
         
         {/* DÒNG QUAN TRỌNG: :appId là biến động */}
-        <Route path="/report/:appId" element={<ChecklistPage />} />
+        <Route path="/checklist/:appId" element={<ChecklistPage />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
