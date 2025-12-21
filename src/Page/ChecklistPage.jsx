@@ -1,14 +1,20 @@
 import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import ChecklistApp from '../components/ChecklistApp';
+// Import ảnh 
+// Solar
+import anhminhhoa1_solar from '../assets/Solar/Ref_1.jpg';
+import anhminhhoa2_solar from '../assets/Solar/Ref_2.jpg';
+import anhminhhoa3_solar from '../assets/Solar/Ref_3.jpg';
+import anhminhhoa4_solar from '../assets/Solar/Ref_4.jpg';
+import anhminhhoa5_solar from '../assets/Solar/Ref_5.jpg';
+// Sự cố 
+import anhminhhoa1_solar from '../assets/Su_co/Ref_1.jpg';
+import anhminhhoa2_solar from '../assets/Su_co/Ref_2.jpg';
+import anhminhhoa3_solar from '../assets/Su_co/Ref_3.jpg';
 
-import anhminhhoa1 from '../assets/Solar/Ref_1.jpg';
-import anhminhhoa2 from '../assets/Solar/Ref_2.jpg';
-import anhminhhoa3 from '../assets/Solar/Ref_3.jpg';
-import anhminhhoa4 from '../assets/Solar/Ref_4.jpg';
-import anhminhhoa5 from '../assets/Solar/Ref_5.jpg';
 // --- PHẦN 1: KHO DỮ LIỆU (CONFIG) ---
-// Bạn gom hết cấu hình Solar, Sự Cố vào đây
+// Gom hết cấu hình Solar, Sự Cố vào đây
 // Lưu ý: Export nó ra để AdminPage còn lấy được tên và link
 export const APP_DATA = {
   
@@ -21,11 +27,11 @@ export const APP_DATA = {
     // Mẹo: Nếu lười import ảnh, bạn có thể để ảnh trong thư mục public và điền đường dẫn string như này: "/images/solar/ref1.jpg"
     // Hoặc nếu muốn import thì viết import ở đầu file rồi điền biến vào đây như cũ.
     questions: [
-       { id: 1, title: "Ảnh tổng quan Inverter, Tủ AC Solar", desc: "Có bị chất đồ dễ gây cháy không?", refImage: [anhminhhoa1, anhminhhoa2] },
-       { id: 2, title: "Ảnh các đầu MC4 ở tủ AC", desc: "Có bị biến dạng không? (Chảy nhựa,...)", refImage: [anhminhhoa2] },
-       { id: 3, title: "Ảnh các đầu MC4 ở Inverter", desc: "Có bị biến dạng không? (chảy nhựa,...)", refImage: [anhminhhoa3] },
-       { id: 4, title: "Ảnh mở cửa tủ AC Solar", desc: "Chụp ảnh trong tủ AC Solar", refImage: [anhminhhoa4] },
-       { id: 5, title: "Ảnh đấu nối Solar và tủ MSB Cửa hàng", desc: "Phần đấu nối có khả năng phát nhiệt không?", refImage: [anhminhhoa5] },
+       { id: 1, title: "Ảnh tổng quan Inverter, Tủ AC Solar", desc: "Có bị chất đồ dễ gây cháy không?", refImage: [anhminhhoa1_solar, anhminhhoa2_solar] },
+       { id: 2, title: "Ảnh các đầu MC4 ở tủ AC", desc: "Có bị biến dạng không? (Chảy nhựa,...)", refImage: [anhminhhoa2_solar] },
+       { id: 3, title: "Ảnh các đầu MC4 ở Inverter", desc: "Có bị biến dạng không? (chảy nhựa,...)", refImage: [anhminhhoa3_solar] },
+       { id: 4, title: "Ảnh mở cửa tủ AC Solar", desc: "Chụp ảnh trong tủ AC Solar", refImage: [anhminhhoa4_solar] },
+       { id: 5, title: "Ảnh đấu nối Solar và tủ MSB Cửa hàng", desc: "Phần đấu nối có khả năng phát nhiệt không?", refImage: [anhminhhoa5_solar] },
     ]
   },
 
