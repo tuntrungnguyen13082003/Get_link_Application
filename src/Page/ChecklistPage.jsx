@@ -1,6 +1,7 @@
 import React, {useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import ChecklistApp from '../components/ChecklistApp';
+
 // Import ảnh 
 // Solar
 import anhminhhoa1_solar from '../assets/Solar/Ref_1.jpg';
@@ -51,36 +52,14 @@ export const APP_DATA = {
   // 3.Thêm Ứng dụng: Copy paste vào đây.
 };
 
-// --- PHẦN 2: COMPONENT HIỂN THỊ (LOGIC) ---
-const ReportPage = () => {
-  const { appId } = useParams(); // Lấy chữ "solar" hoặc "su_co" trên thanh địa chỉ
-  
-  const currentApp = APP_DATA[appId]; // Tìm trong kho dữ liệu xem có không
 
-  useEffect(() => {
-    if (currentApp) {
-      // Nếu có biến tabTitle thì dùng, không thì dùng tạm biến name
-      document.title = currentApp.tabTitle || currentApp.name;
-    }
-    // Khi thoát trang thì trả về tên mặc định (tùy chọn)
-    return () => {
-      document.title = "App Báo Cáo";
-    };
-  }, [currentApp]);
 
-  // Nếu khách gõ link linh tinh (vd: /report/tinh-yeu) -> Đá về trang 404
-  if (!currentApp) {
-    return <Navigate to="/404" replace />;
-  }
 
-  // Nếu tìm thấy -> Hiển thị ChecklistApp với dữ liệu tương ứng
-  return (
-    <ChecklistApp
-      sheetName={currentApp.sheetName}
-      reportName={currentApp.reportName}
-      questions={currentApp.questions}
-    />
-  );
+
+// --- PHẦN 2: COMPONENT CHECKLISTPAGE ---
+const ChecklistPage = () => {
+  // Chỉ cần ném cục dữ liệu vào cho máy xử lý là xong
+  return <ChecklistRouter data={APP_DATA} />;
 };
 
-export default ReportPage;
+export default ChecklistPage;
