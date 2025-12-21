@@ -10,6 +10,10 @@ const AdminPage = () => {
   // Link Script của bạn (Phiên bản mới nhất đã update)
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxiHfxLHOBwADHixZk5QerQFVyPFNqwfXqqfwAoskYMdjQs97pON-K-mVA-EjiNRWbeVA/exec"; 
 
+  useEffect(() => {
+    document.title = "Get Link System"; // Đổi tên tab thành Get Link
+  }, []);
+  
   // Tự động lấy tên miền 
   const CURRENT_DOMAIN = window.location.origin;
 
@@ -18,7 +22,7 @@ const AdminPage = () => {
     name: app.name,
     sheetName: app.sheetName,
     // Tự động ghép link: domain hiện tại + /report/ + id của app
-    url: `${window.location.origin}/report/${app.id}`
+    url: `${window.location.origin}/Checklist/${app.id}`
 }));
 
   // --- STATE ---

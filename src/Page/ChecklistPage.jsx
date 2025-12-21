@@ -24,6 +24,7 @@ export const APP_DATA = {
     name: '📸 Báo cáo Solar',
     sheetName: 'SOLAR',
     reportName: 'SolarCheckListEvent',
+    tabTitle: 'Solar Checklist',
     questions: [
        { id: 1, title: "Ảnh tổng quan Inverter, Tủ AC Solar", desc: "Có bị chất đồ dễ gây cháy không?", refImage: [anhminhhoa1_solar, anhminhhoa2_solar] },
        { id: 2, title: "Ảnh các đầu MC4 ở tủ AC", desc: "Có bị biến dạng không? (Chảy nhựa,...)", refImage: [anhminhhoa2_solar] },
@@ -39,6 +40,7 @@ export const APP_DATA = {
     name: '⚠️ Báo cáo Sự Cố',
     sheetName: 'SU_CO',
     reportName: 'Process_Problem',
+    tabTitle: 'Problem  Checklist',
     questions: [
        { id: 1, title: "Ảnh tổng quan Inverter, Tủ AC Solar", desc: "Có bị chất đồ dễ gây cháy không?", refImage: anhminhhoa1_suco },
        { id: 2, title: "Ảnh các đầu MC4 ở tủ AC", desc: "Có bị biến dạng không? (Chảy nhựa,...)", refImage: anhminhhoa2_suco },
@@ -55,6 +57,17 @@ const ReportPage = () => {
   
   const currentApp = APP_DATA[appId]; // Tìm trong kho dữ liệu xem có không
 
+  useEffect(() => {
+    if (currentApp) {
+      // Nếu có biến tabTitle thì dùng, không thì dùng tạm biến name
+      document.title = currentApp.tabTitle || currentApp.name;
+    }
+    // Khi thoát trang thì trả về tên mặc định (tùy chọn)
+    return () => {
+      document.title = "App Báo Cáo";
+    };
+  }, [currentApp]);
+  
   // Nếu khách gõ link linh tinh (vd: /report/tinh-yeu) -> Đá về trang 404
   if (!currentApp) {
     return <Navigate to="/404" replace />;
