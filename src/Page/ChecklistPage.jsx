@@ -24,8 +24,6 @@ export const APP_DATA = {
     name: '📸 Báo cáo Solar',
     sheetName: 'SOLAR',
     reportName: 'SolarCheckListEvent',
-    // Mẹo: Nếu lười import ảnh, bạn có thể để ảnh trong thư mục public và điền đường dẫn string như này: "/images/solar/ref1.jpg"
-    // Hoặc nếu muốn import thì viết import ở đầu file rồi điền biến vào đây như cũ.
     questions: [
        { id: 1, title: "Ảnh tổng quan Inverter, Tủ AC Solar", desc: "Có bị chất đồ dễ gây cháy không?", refImage: [anhminhhoa1_solar, anhminhhoa2_solar] },
        { id: 2, title: "Ảnh các đầu MC4 ở tủ AC", desc: "Có bị biến dạng không? (Chảy nhựa,...)", refImage: [anhminhhoa2_solar] },
