@@ -9,9 +9,9 @@ import anhminhhoa3_solar from '../assets/Solar/Ref_3.jpg';
 import anhminhhoa4_solar from '../assets/Solar/Ref_4.jpg';
 import anhminhhoa5_solar from '../assets/Solar/Ref_5.jpg';
 // Sự cố 
-import anhminhhoa1_solar from '../assets/Su_co/Ref_1.jpg';
-import anhminhhoa2_solar from '../assets/Su_co/Ref_2.jpg';
-import anhminhhoa3_solar from '../assets/Su_co/Ref_3.jpg';
+import anhminhhoa1_suco from '../assets/Su_co/Ref_1.jpg';
+import anhminhhoa2_suco from '../assets/Su_co/Ref_2.jpg';
+import anhminhhoa3_suco from '../assets/Su_co/Ref_3.jpg';
 
 // --- PHẦN 1: KHO DỮ LIỆU (CONFIG) ---
 // Gom hết cấu hình Solar, Sự Cố vào đây
@@ -40,9 +40,9 @@ export const APP_DATA = {
     sheetName: 'SU_CO',
     reportName: 'Process_Problem',
     questions: [
-       { id: 1, title: "Ảnh tổng quan Inverter, Tủ AC Solar", desc: "Có bị chất đồ dễ gây cháy không?", refImage: anhminhhoa1 },
-       { id: 2, title: "Ảnh các đầu MC4 ở tủ AC", desc: "Có bị biến dạng không? (Chảy nhựa,...)", refImage: anhminhhoa2 },
-       { id: 3, title: "Ảnh các đầu MC4 ở Inverter", desc: "Có bị biến dạng không? (chảy nhựa,...)", refImage: anhminhhoa3 },
+       { id: 1, title: "Ảnh tổng quan Inverter, Tủ AC Solar", desc: "Có bị chất đồ dễ gây cháy không?", refImage: anhminhhoa1_suco },
+       { id: 2, title: "Ảnh các đầu MC4 ở tủ AC", desc: "Có bị biến dạng không? (Chảy nhựa,...)", refImage: anhminhhoa2_suco },
+       { id: 3, title: "Ảnh các đầu MC4 ở Inverter", desc: "Có bị biến dạng không? (chảy nhựa,...)", refImage: anhminhhoa3_suco },
     ]
   },
 
