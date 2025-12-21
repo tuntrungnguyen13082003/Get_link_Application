@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Home, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const NotFoundPage = () => {
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     document.title = "404 - Not Found";
   }, []);

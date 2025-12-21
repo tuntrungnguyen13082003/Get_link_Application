@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import ChecklistApp from '../components/ChecklistApp';
 // Import ảnh 
@@ -67,7 +67,7 @@ const ReportPage = () => {
       document.title = "App Báo Cáo";
     };
   }, [currentApp]);
-  
+
   // Nếu khách gõ link linh tinh (vd: /report/tinh-yeu) -> Đá về trang 404
   if (!currentApp) {
     return <Navigate to="/404" replace />;
