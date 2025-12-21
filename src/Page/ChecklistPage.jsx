@@ -1,7 +1,5 @@
-import React, {useEffect } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
-import ChecklistApp from '../components/ChecklistApp';
-
+import React from 'react';
+import ChecklistRouter from '../components/ChecklistRouter';
 // Import ảnh 
 // Solar
 import anhminhhoa1_solar from '../assets/Solar/Ref_1.jpg';
