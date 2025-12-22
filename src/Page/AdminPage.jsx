@@ -22,7 +22,7 @@ const AdminPage = () => {
     name: app.name,
     sheetName: app.sheetName,
     // Tự động ghép link: domain hiện tại + /Checklist/ + id của app
-    url: `${window.location.origin}/Checklist/${app.id}`
+    url: `${window.location.origin}/checklist/${app.id}`
 }));
 
   // --- STATE ---
