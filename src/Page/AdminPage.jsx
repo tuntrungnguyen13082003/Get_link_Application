@@ -131,4 +131,34 @@ const AdminPage = () => {
           {questions.map((q, i) => (
             <div key={i} className="border p-4 rounded relative">
               <button onClick={()=>removeQuestion(i)} className="absolute top-2 right-2 text-red-500"><Trash2 size={16}/></button>
-              <div className="font-bold text-blue-600 mb-2">Câu {i+1}
+              <div className="font-bold text-blue-600 mb-2">Câu {i+1}</div>
+              <input className="border p-2 w-full mb-2 rounded font-bold" placeholder="Tiêu đề..." value={q.title} onChange={e=>handleQChange(i,'title',e.target.value)}/>
+              <input className="border p-2 w-full mb-2 rounded text-sm" placeholder="Mô tả..." value={q.desc} onChange={e=>handleQChange(i,'desc',e.target.value)}/>
+              
+              <div className="mt-2">
+                 {!q.imagePreview ? (
+                   <label className="cursor-pointer bg-slate-100 px-3 py-1 rounded inline-flex items-center gap-2 text-sm hover:bg-blue-50">
+                     <ImageIcon size={16}/> Thêm ảnh mẫu <input type="file" className="hidden" accept="image/*" onChange={e=>handleImageSelect(i,e)}/>
+                   </label>
+                 ) : (
+                   <div className="flex gap-2 items-center bg-blue-50 p-2 rounded w-fit">
+                     <img src={q.imagePreview} className="h-16 w-16 object-cover rounded border"/>
+                     <label className="text-xs text-blue-600 underline cursor-pointer">Đổi ảnh<input type="file" className="hidden" accept="image/*" onChange={e=>handleImageSelect(i,e)}/></label>
+                   </div>
+                 )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-3">
+          <button onClick={addQuestion} className="px-4 py-2 bg-slate-200 rounded font-bold hover:bg-slate-300"><Plus/></button>
+          <button onClick={handleSave} disabled={isLoading} className="flex-1 px-4 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 flex justify-center items-center gap-2">
+            {isLoading ? "Đang xử lý (Sẽ hơi lâu vì upload từng ảnh)..." : <><CheckCircle/> LƯU APP</>}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+export default AdminPage;
