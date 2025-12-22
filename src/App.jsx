@@ -1,22 +1,16 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-
-// Import các trang
-import AdminPage from './Page/AdminPage';
-import ChecklistPage from './Page/ChecklistPage';
-import NotFoundPage from './Page/NotFoundPage';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import ChecklistPage from './pages/ChecklistPage';
+import AdminPage from './pages/AdminPage';
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/admin" replace />} />
-        <Route path="/admin" element={<AdminPage />} />
-        
-        {/* DÒNG QUAN TRỌNG: :appId là biến động */}
+        <Route path="/" element={<HomePage />} />
         <Route path="/checklist/:appId" element={<ChecklistPage />} />
-
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
     </BrowserRouter>
   );
