@@ -5,7 +5,7 @@ import { APP_DATA } from './ChecklistPage'; // Nhớ import đúng file
 const AdminPage = () => {
   // --- CẤU HÌNH ---
   // Thay LINK SCRIPT MỚI CỦA BẠN VÀO ĐÂY
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTHnebOkrRRHZYsiI5JzeHvTZrSalCz-EikuUkBXb4Brbo4JxXky9j2rq2zH_nzC-mug/exec"; 
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzX1vFbHa3A88J8BiY9r2a_BJ-It51uDp3zZUO828hMKJRW7d7BD7ImNWwmRtENRfuEtw/exec"; 
 
   const AVAILABLE_APPS = APP_DATA ? Object.values(APP_DATA).map(app => ({
     id: app.id, name: app.name, sheetName: app.sheetName,
