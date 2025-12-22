@@ -8,7 +8,7 @@ const AdminPage = () => {
   const ADMIN_USER = "admin";
   const ADMIN_PASS = "admin";
   // Link Script của bạn (Phiên bản mới nhất đã update)
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgYSXY6r-6EyVsvKwuq4vYe_sxuMmHFf2D2xOrciBqETNcdLrK7tZEUv-nqhRYve1e9g/exec"; 
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKVJxqhlMR8QCxeXnbVLXdNVgCxjslGZBuVJAJmAtQb_MgkSQbT1lClFvYDEAIqv4hog/exec"; 
 
   useEffect(() => {
     document.title = "Get Link System"; // Đổi tên tab thành Get Link

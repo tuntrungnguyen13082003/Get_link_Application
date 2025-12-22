@@ -17,7 +17,7 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
   const [realCode, setRealCode] = useState(""); 
 
   // URL Script (Dùng chung cho cả hệ thống)
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgYSXY6r-6EyVsvKwuq4vYe_sxuMmHFf2D2xOrciBqETNcdLrK7tZEUv-nqhRYve1e9g/exec"; 
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKVJxqhlMR8QCxeXnbVLXdNVgCxjslGZBuVJAJmAtQb_MgkSQbT1lClFvYDEAIqv4hog/exec"; 
 
   const queryParams = new URLSearchParams(window.location.search);
   const fakeTokenFromUrl = queryParams.get("code"); 
