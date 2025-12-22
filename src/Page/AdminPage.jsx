@@ -4,7 +4,9 @@ import { Plus, Trash2, Save, Layout, Image as ImageIcon, CheckCircle, Sun, Zap, 
 const ICON_LIST = [ {n:'Sun',c:<Sun/>}, {n:'Zap',c:<Zap/>}, {n:'Droplet',c:<Droplet/>}, {n:'Flame',c:<Flame/>}, {n:'FileText',c:<FileText/>}, {n:'Settings',c:<Settings/>}, {n:'Shield',c:<Shield/>}, {n:'Camera',c:<Camera/>}, {n:'Home',c:<Home/>}, {n:'PenTool',c:<PenTool/>} ];
 
 const AdminPage = () => {
-  const GOOGLE_SCRIPT_URL = "LINK_SCRIPT_CUA_BANhttps://script.google.com/macros/s/AKfycbw9LCBL0ahbD-M7ENyUymlIkd2ImYep6POzdX-Bbsqqi4MqetR0Pna3yB4TysBsYxYa7w/exec"; 
+  // --- ĐÃ SỬA: Xóa đoạn text thừa ở đầu link ---
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw9LCBL0ahbD-M7ENyUymlIkd2ImYep6POzdX-Bbsqqi4MqetR0Pna3yB4TysBsYxYa7w/exec"; 
+  
   const [isLoading, setIsLoading] = useState(false);
   
   // Form Data
@@ -19,50 +21,87 @@ const AdminPage = () => {
   const addQuestion = () => setQuestions([...questions, { id: questions.length + 1, title: "", desc: "", imageFile: null, imagePreview: null }]);
   const removeQuestion = (idx) => setQuestions(questions.filter((_, i) => i !== idx));
   const handleQChange = (idx, field, val) => { const newQ = [...questions]; newQ[idx][field] = val; setQuestions(newQ); };
+  
   const handleImageSelect = (idx, e) => {
     const file = e.target.files[0];
     if (file) { const newQ = [...questions]; newQ[idx].imageFile = file; newQ[idx].imagePreview = URL.createObjectURL(file); setQuestions(newQ); }
   };
+  
   const fileToBase64 = (file) => new Promise((resolve) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result.split(',')[1]); reader.readAsDataURL(file); });
 
+  // --- HÀM LƯU ĐÃ SỬA LẠI (QUAN TRỌNG) ---
   const handleSave = async () => {
     if(!appId || !appName || !sheetName || !reportName || !tabTitle) return alert("Điền đủ 5 thông tin cơ bản!");
     if(!window.confirm("Tạo ứng dụng này?")) return;
+    
     setIsLoading(true);
+    
     try {
-      // 1. Upload Ảnh Mẫu (vào folder templates)
-      const processedQuestions = await Promise.all(questions.map(async (q) => {
+      // BƯỚC 1: Upload từng ảnh một (Sử dụng vòng lặp for thay vì Promise.all)
+      // Cách này chậm hơn xíu nhưng đảm bảo Google Script không bị quá tải
+      const processedQuestions = [];
+
+      for (const q of questions) {
         let imgUrl = null;
+        
+        // Nếu câu hỏi này có file ảnh thì thực hiện upload
         if(q.imageFile) {
           const base64 = await fileToBase64(q.imageFile);
+          
           const res = await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
             body: JSON.stringify({
               action: "upload_image",
               folderName: sheetName,
-              folderType: "templates", // <--- QUAN TRỌNG: Lưu vào templates
+              folderType: "templates", // Lưu vào folder templates
               fileName: `Ref_Q${q.id}_${q.imageFile.name}`,
               mimeType: q.imageFile.type,
               base64: base64
             })
           }).then(r => r.json());
-          if(res.status === 'success') imgUrl = res.url;
+          
+          if(res.status === 'success') {
+            imgUrl = res.url;
+          } else {
+            console.error("Lỗi upload ảnh ở câu:", q.id);
+          }
         }
-        return { id: q.id, title: q.title, desc: q.desc, refImage: imgUrl ? [imgUrl] : (q.refImage || []) };
-      }));
+        
+        // Sau khi (có thể) upload xong, lưu kết quả vào mảng
+        processedQuestions.push({ 
+          id: q.id, 
+          title: q.title, 
+          desc: q.desc, 
+          refImage: imgUrl ? [imgUrl] : (q.refImage || []) 
+        });
+      }
 
-      // 2. Lưu Config
+      // BƯỚC 2: Sau khi xử lý xong hết ảnh, mới gửi cấu hình App đi
       await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
         body: JSON.stringify({
           action: "save_app_config",
-          id: appId, name: appName, icon: selectedIcon, sheetName, reportName, tabTitle,
+          id: appId, 
+          name: appName, 
+          icon: selectedIcon, 
+          sheetName: sheetName, 
+          reportName: reportName, 
+          tabTitle: tabTitle,
           questions: processedQuestions
         })
       });
-      alert("✅ Thành công!");
-      setAppId(""); setAppName(""); setSheetName(""); setQuestions([{id:1,title:"",desc:""}]);
-    } catch(err) { alert("Lỗi: " + err.message); } finally { setIsLoading(false); }
+
+      alert("✅ Thành công! Ứng dụng đã được tạo.");
+      
+      // Reset form sau khi thành công
+      setAppId(""); setAppName(""); setSheetName(""); setReportName(""); setTabTitle("");
+      setQuestions([{id:1, title:"", desc:"", imageFile:null}]);
+      
+    } catch(err) { 
+      alert("Lỗi: " + err.message + "\n(Hãy kiểm tra xem Google Script đã được Deploy chế độ 'Anyone' chưa)"); 
+    } finally { 
+      setIsLoading(false); 
+    }
   };
 
   return (
@@ -92,34 +131,4 @@ const AdminPage = () => {
           {questions.map((q, i) => (
             <div key={i} className="border p-4 rounded relative">
               <button onClick={()=>removeQuestion(i)} className="absolute top-2 right-2 text-red-500"><Trash2 size={16}/></button>
-              <div className="font-bold text-blue-600 mb-2">Câu {i+1}</div>
-              <input className="border p-2 w-full mb-2 rounded font-bold" placeholder="Tiêu đề..." value={q.title} onChange={e=>handleQChange(i,'title',e.target.value)}/>
-              <input className="border p-2 w-full mb-2 rounded text-sm" placeholder="Mô tả..." value={q.desc} onChange={e=>handleQChange(i,'desc',e.target.value)}/>
-              
-              <div className="mt-2">
-                 {!q.imagePreview ? (
-                   <label className="cursor-pointer bg-slate-100 px-3 py-1 rounded inline-flex items-center gap-2 text-sm hover:bg-blue-50">
-                     <ImageIcon size={16}/> Thêm ảnh mẫu <input type="file" className="hidden" accept="image/*" onChange={e=>handleImageSelect(i,e)}/>
-                   </label>
-                 ) : (
-                   <div className="flex gap-2 items-center bg-blue-50 p-2 rounded w-fit">
-                     <img src={q.imagePreview} className="h-16 w-16 object-cover rounded border"/>
-                     <label className="text-xs text-blue-600 underline cursor-pointer">Đổi ảnh<input type="file" className="hidden" accept="image/*" onChange={e=>handleImageSelect(i,e)}/></label>
-                   </div>
-                 )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex gap-3">
-          <button onClick={addQuestion} className="px-4 py-2 bg-slate-200 rounded font-bold hover:bg-slate-300"><Plus/></button>
-          <button onClick={handleSave} disabled={isLoading} className="flex-1 px-4 py-2 bg-green-600 text-white rounded font-bold hover:bg-green-700 flex justify-center items-center gap-2">
-            {isLoading ? "Đang xử lý..." : <><CheckCircle/> LƯU APP</>}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-export default AdminPage;
+              <div className="font-bold text-blue-600 mb-2">Câu {i+1}
