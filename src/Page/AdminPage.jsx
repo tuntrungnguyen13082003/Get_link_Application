@@ -11,7 +11,7 @@ const AdminPage = () => {
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3OorDYwIhshFZE1TENlYXC-TfcfwzZhbshxgltEkFDyca3fCkBR2W8geLOT5-HAwrtQ/exec"; 
 
   useEffect(() => {
-    document.title = "Get Link System"; // Đổi tên tab thành Get Link
+    document.title = "Get Link Sys"; // Đổi tên tab thành Get Link
   }, []);
 
   // Tự động lấy tên miền 
