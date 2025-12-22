@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import ChecklistPage from './pages/ChecklistPage';
-import AdminPage from './pages/AdminPage';
+import HomePage from './Page/HomePage';
+import ChecklistPage from './Page/ChecklistPage';
+import AdminPage from './Page/AdminPage';
 
 const App = () => {
   return (
