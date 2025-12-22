@@ -21,7 +21,7 @@ export const APP_DATA = {
   solar: {
     id: 'solar', // ID này phải trùng với key của object
     name: '📸 Báo cáo Solar',
-    sheetName: 'SOLAR',
+    sheetName: 'SOLAR', 
     reportName: 'SolarCheckListEvent',
     tabTitle: 'Solar Checklist',
     questions: [
