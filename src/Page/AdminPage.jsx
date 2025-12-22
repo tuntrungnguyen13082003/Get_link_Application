@@ -9,7 +9,7 @@ const AdminPage = () => {
 
   const AVAILABLE_APPS = APP_DATA ? Object.values(APP_DATA).map(app => ({
     id: app.id, name: app.name, sheetName: app.sheetName,
-    url: `${window.location.origin}/report/${app.id}`
+    url: `${window.location.origin}/checklist/${app.id}`
   })) : [];
 
   // --- STATE ---
