@@ -1,28 +1,24 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import HomePage from './Page/HomePage';
-import ChecklistPage from './Page/ChecklistPage';
+
+// Import các trang
 import AdminPage from './Page/AdminPage';
+import ChecklistPage from './Page/ChecklistPage';
+import NotFoundPage from './Page/NotFoundPage';
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 1. TRANG CHỦ (Mặc định) -> Giờ sẽ là trang ADMIN */}
-        <Route path="/" element={<AdminPage />} />
-
-        {/* 2. Trang làm bài (Giữ nguyên) */}
-        <Route path="/checklist/:appId" element={<ChecklistPage />} />
-        
-        {/* 3. Trang Admin (Giữ thêm đường dẫn này để gõ /admin cũng vào được) */}
+        <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="/admin" element={<AdminPage />} />
+        
+        {/* DÒNG QUAN TRỌNG: :appId là biến động */}
+        <Route path="/checklist/:appId" element={<ChecklistPage />} />
 
-        {/* 4. [TÙY CHỌN] Danh sách công việc cũ */}
-        {/* Nếu muốn xem danh sách việc cho nhân viên, giờ phải vào link /jobs */}
-        <Route path="/jobs" element={<HomePage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );
 };
-
 export default App;
