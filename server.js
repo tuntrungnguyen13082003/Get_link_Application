@@ -23,35 +23,7 @@ if (!fs.existsSync(DB_PATH)) {
 
 // --- CẤU HÌNH LƯU FILE ZIP ---
 // --- CẤU HÌNH LƯU FILE ZIP THEO SHEETNAME ---
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        // 1. Lấy token từ body gửi lên
-        const { token } = req.body;
-        let folderName = 'default';
-        try {
-            // 2. Đọc database để tìm sheetName tương ứng với token này
-            const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-            const entry = db.find(item => item.token === token);
-            if (entry && entry.sheetName) {
-                folderName = entry.sheetName; // Ví dụ: 'SOLAR'
-            }
-        } catch (error) {
-            console.error("Không thể đọc database để xác định thư mục:", error);
-        }
-        // 3. Tạo đường dẫn thư mục: uploads/SOLAR/ (hoặc tên sheet khác)
-        // Tôi bỏ bớt cấp 'anh_chup' để folder của bạn gọn hơn như ý bạn muốn
-        const dir = path.join(UPLOADS_DIR, folderName);
-        // 4. Nếu thư mục chưa có thì tự động tạo (recursive: true)
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        // Giữ nguyên tên file gốc của bạn
-        cb(null, file.originalname);
-    }
-});
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // --- 1. API: TẠO MÃ MỚI (Admin) ---
@@ -127,15 +99,45 @@ app.post('/api/check-status', (req, res) => {
 
 // --- 3. API: NHẬN BÁO CÁO & KHÓA MÃ ---
 app.post('/api/upload-report', upload.single('file'), (req, res) => {
-    const { token } = req.body;
-    let db = JSON.parse(fs.readFileSync(DB_PATH));
-    const index = db.findIndex(item => item.token === token);
-    if (index !== -1) {
-        db[index].status = 'used';
-        db[index].updatedAt = new Date().toISOString();
-        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    try {
+        const { token } = req.body;
+        
+        // 1. Đọc database tìm sheetName dựa vào token
+        const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+        const entry = db.find(item => item.token === token);
+
+        if (!entry) {
+            return res.status(400).json({ status: 'error', message: 'Token không hợp lệ' });
+        }
+
+        // 2. Xác định thư mục đích theo sheetName (Ví dụ: SOLAR)
+        const sheetFolder = entry.sheetName; 
+        const targetDir = path.join(UPLOADS_DIR, sheetFolder);
+
+        // 3. Tự động tạo thư mục nếu chưa có
+        if (!fs.existsSync(targetDir)) {
+            fs.mkdirSync(targetDir, { recursive: true });
+        }
+
+        // 4. Ghi file từ bộ nhớ vào thư mục đích
+        const filePath = path.join(targetDir, req.file.originalname);
+        fs.writeFileSync(filePath, req.file.buffer);
+
+        // 5. Cập nhật trạng thái 'used' như cũ
+        const index = db.findIndex(item => item.token === token);
+        if (index !== -1) {
+            db[index].status = 'used';
+            db[index].updatedAt = new Date().toISOString();
+            fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+        }
+
+        console.log(`✅ Đã lưu báo cáo vào: ${targetDir}`);
+        res.json({ status: 'success', message: 'Báo cáo đã lưu thành công' });
+
+    } catch (error) {
+        console.error("Lỗi upload:", error);
+        res.status(500).json({ status: 'error', message: error.message });
     }
-    res.json({ status: 'success', message: 'Báo cáo đã lưu' });
 });
 
 app.listen(17004, '0.0.0.0', () => {
