@@ -46,7 +46,7 @@ app.post('/api/create-link', (req, res) => {
     // 2. KIỂM TRA TRÙNG: Tìm xem đã có mã này cho ứng dụng này mà vẫn đang 'active' chưa
     const isDuplicate = db.find(item => 
         item.realCode === code && 
-        item.sheetName === sheet_name && 
+        item.sheetName === sheet_name
     );
 
     if (isDuplicate) {
