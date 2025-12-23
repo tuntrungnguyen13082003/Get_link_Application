@@ -13,8 +13,9 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
   // THAY ĐỔI: Trỏ về cổng 3001 của Server thay vì Google
   const BACKEND_URL = "http://solar-field.ddns.net:17004/api"; 
 
-  const queryParams = new URLSearchParams(window.location.search);
-  const fakeTokenFromUrl = queryParams.get("code"); 
+const urlParts = window.location.href.split('code=');
+const fakeTokenFromUrl = urlParts.length > 1 ? urlParts[1] : null;
+console.log("Mã lấy được từ URL là:", fakeTokenFromUrl); 
 
   // --- LOGIC KIỂM TRA MÃ TRÊN SERVER NỘI BỘ ---
   useEffect(() => {
@@ -26,7 +27,7 @@ const checkTokenStatus = async () => {
     //     setIsCheckingCode(false); 
     //     return;
     // }
-    
+
 
     try {
         // 2. GỬI YÊU CẦU: Tới server để kiểm tra 3 yếu tố
