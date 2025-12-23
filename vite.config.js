@@ -5,4 +5,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: './', // <--- THÊM DÒNG NÀY (Quan trọng: dấu chấm và dấu gạch chéo)
+  server: {
+    host: '0.0.0.0',
+    port: 17003,
+    allowedHosts: true
+  }
 })
