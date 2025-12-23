@@ -37,35 +37,39 @@ const upload = multer({ storage });
 
 // --- 1. API: TẠO MÃ MỚI (Admin) ---
 app.post('/api/create-link', (req, res) => {
-    const { realCode, sheetName } = req.body;
+    // Nhận dữ liệu từ Admin gửi lên (Lưu ý: Admin gửi 'code', 'token', 'sheet_name')
+    const { code, token, sheet_name } = req.body;
+    
+    // 1. Đọc database hiện có
     const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
 
-    // BƯỚC MỚI: Kiểm tra xem mã nàynày đã tồn tại chưa
-    const existingCode = db.find(item => item.realCode === realCode && item.sheetName === sheetName);
+    // 2. KIỂM TRA TRÙNG: Tìm xem đã có mã này cho ứng dụng này mà vẫn đang 'active' chưa
+    const isDuplicate = db.find(item => 
+        item.realCode === code && 
+        item.sheetName === sheet_name && 
+    );
 
-    if (existingCode) {
-        // Nếu đã có mã không tạo mới mà trả về luôn link cũ
+    if (isDuplicate) {
+        // Nếu trùng, trả về lỗi để Admin hiển thị thông báo "Hãy chọn mã mới"
         return res.json({ 
-            success: true, 
-            token: existingCode.token, 
-            message: 'Mã này đã tồn tại' 
+            status: 'error', 
+            message: 'Mã này đã tồn tại, vui lòng chọn mã khác!' 
         });
     }
 
-    // Nếu chưa có thì mới tiến hành tạo Token mới như cũ
-    const token = generateRandomToken(15); 
-    const newEntry = {
-        realCode,
-        token,
-        sheetName,
+    // 3. Nếu không trùng, tiến hành lưu như bình thường
+    db.push({
+        realCode: code,
+        token: token,
+        sheetName: sheet_name,
         status: 'active',
         createdAt: new Date().toISOString()
-    };
+    });
 
-    db.push(newEntry);
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
     
-    res.json({ success: true, token });
+    // Trả về thành công để Admin biết và hiện link
+    res.json({ status: 'success' });
 });
 
 // --- 2. API: KIỂM TRA MÃ (ChecklistApp) ---
