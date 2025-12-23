@@ -26,6 +26,7 @@ const checkTokenStatus = async () => {
     //     setIsCheckingCode(false); 
     //     return;
     // }
+    
 
     try {
         // 2. GỬI YÊU CẦU: Tới server để kiểm tra 3 yếu tố
