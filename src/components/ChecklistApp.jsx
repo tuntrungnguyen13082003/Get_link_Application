@@ -11,7 +11,7 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
   const [realCode, setRealCode] = useState(""); 
 
   // THAY ĐỔI: Trỏ về cổng 3001 của Server thay vì Google
-  const BACKEND_URL = "http://solar-field.ddns.net:3001/api"; 
+  const BACKEND_URL = "http://solar-field.ddns.net:17004/api"; 
 
   const queryParams = new URLSearchParams(window.location.search);
   const fakeTokenFromUrl = queryParams.get("code"); 
