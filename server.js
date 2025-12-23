@@ -54,6 +54,9 @@ app.post('/api/create-link', (req, res) => {
 // --- API KIỂM TRA MÃ (3 LỚP BẢO MẬT) ---
 app.post('/api/check-status', (req, res) => {
     try {
+        console.log("--- ChecklistApp vừa gửi dữ liệu tới ---");
+        console.log("Dữ liệu nhận được:", req.body); 
+        console.log("-----------------------------------------");
         const { token, sheetName } = req.body;
         
         // Đọc dữ liệu mới nhất từ file
