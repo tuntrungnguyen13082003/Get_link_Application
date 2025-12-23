@@ -19,6 +19,7 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
   // --- LOGIC KIỂM TRA MÃ TRÊN SERVER NỘI BỘ ---
   useEffect(() => {
 const checkTokenStatus = async () => {
+    console.log("Đang bắt đầu gọi Server..."); // Thêm dòng này
    // 1. CHỐT CHẶN: Kiểm tra xem link có chứa mã code/token không
     if (!fakeTokenFromUrl) {
         setSessionStatus("invalid"); 
