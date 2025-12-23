@@ -72,6 +72,6 @@ app.post('/api/upload-report', upload.single('file'), (req, res) => {
     res.json({ status: 'success', message: 'Báo cáo đã lưu' });
 });
 
-app.listen(3001, '0.0.0.0', () => {
-    console.log('✅ Backend Server đang chạy tại cổng 3001 (ES Module mode)');
+app.listen(17004, '0.0.0.0', () => {
+    console.log('✅ Backend Server đang chạy tại cổng 17004 (ES Module mode)');
 });
