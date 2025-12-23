@@ -18,28 +18,46 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
 
   // --- LOGIC KIỂM TRA MÃ TRÊN SERVER NỘI BỘ ---
   useEffect(() => {
-    const checkTokenStatus = async () => {
-      if (!fakeTokenFromUrl) {
-        setSessionStatus("invalid"); setIsCheckingCode(false); return;
-      }
-      try {
+const checkTokenStatus = async () => {
+    // 1. CHỐT CHẶN: Kiểm tra xem link có chứa mã code/token không
+    if (!fakeTokenFromUrl) {
+        setSessionStatus("invalid"); 
+        setIsCheckingCode(false); 
+        return;
+    }
+
+    try {
+        // 2. GỬI YÊU CẦU: Tới server để kiểm tra 3 yếu tố
         const response = await fetch(`${BACKEND_URL}/check-status`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-             token: fakeTokenFromUrl, 
-             sheet_name: sheetName
-          })
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                token: fakeTokenFromUrl,
+                sheetName: sheetName 
+            })
         });
+
         const data = await response.json();
-        setSessionStatus(data.result); // "active", "used", hoặc "invalid"
-        if (data.realCode) setRealCode(data.realCode);
-      } catch (error) {
+
+        // 3. XỬ LÝ KẾT QUẢ TỪ SERVER
+        if (data.result === 'active') {
+            // Trường hợp 1: Mọi thứ OK (Khớp Token, Khớp App, Status là Active)
+            setSessionStatus("active");
+            setRealCode(data.realCode);
+        } else if (data.result === 'used') {
+            // Trường hợp 2: Khớp Token, Khớp App nhưng Status là Used
+            setSessionStatus("used");
+        } else {
+            // Trường hợp 3: Token không tồn tại hoặc sai App
+            setSessionStatus("invalid");
+        }
+    } catch (error) {
+        // Trường hợp 4: Lỗi kết nối (Server chưa bật hoặc sai cổng)
         setSessionStatus("error");
-      } finally {
+    } finally {
         setIsCheckingCode(false);
-      }
-    };
+    }
+};
     checkTokenStatus();
   }, [fakeTokenFromUrl, sheetName]);
 

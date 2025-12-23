@@ -52,11 +52,28 @@ app.post('/api/create-link', (req, res) => {
 
 // --- 2. API: KIỂM TRA MÃ (ChecklistApp) ---
 app.post('/api/check-status', (req, res) => {
-    const { token } = req.body;
+    // Nhận cả token và sheetName từ Frontend gửi lên
+    const { token, sheetName } = req.body; 
+    
     const db = JSON.parse(fs.readFileSync(DB_PATH));
-    const entry = db.find(item => item.token === token);
-    if (!entry) return res.json({ result: 'invalid' });
-    res.json({ result: entry.status, realCode: entry.realCode });
+    
+    // Tìm mã khớp cả Token VÀ SheetName
+    const entry = db.find(item => item.token === token && item.sheetName === sheetName);
+    
+    if (!entry) {
+        return res.json({ result: 'invalid', message: 'Mã không tồn tại hoặc sai ứng dụng' });
+    }
+
+    // Kiểm tra trạng thái (Active hay đã Used)
+    if (entry.status !== 'active') {
+        return res.json({ result: 'used', message: 'Mã này đã được sử dụng trước đó' });
+    }
+
+    // Nếu vượt qua tất cả, trả về thành công và mã thật
+    res.json({ 
+        result: 'active', 
+        realCode: entry.realCode 
+    });
 });
 
 // --- 3. API: NHẬN BÁO CÁO & KHÓA MÃ ---
