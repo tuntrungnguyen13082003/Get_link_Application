@@ -37,17 +37,39 @@ const upload = multer({ storage });
 
 // --- 1. API: TẠO MÃ MỚI (Admin) ---
 app.post('/api/create-link', (req, res) => {
-    const { code, token, sheet_name } = req.body;
-    const db = JSON.parse(fs.readFileSync(DB_PATH));
-    db.push({
-        realCode: code,
-        token: token,
-        sheetName: sheet_name,
+    const { realCode, sheetName } = req.body;
+    const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+
+    // BƯỚC MỚI: Kiểm tra xem mã này đã có bản ghi nào đang 'active' chưa
+    const existingCode = db.find(item => 
+        item.realCode === realCode && 
+        item.sheetName === sheetName && 
+        item.status === 'active'
+    );
+
+    if (existingCode) {
+        // Nếu đã có mã đang chờ sử dụng, không tạo mới mà trả về luôn link cũ
+        return res.json({ 
+            success: true, 
+            token: existingCode.token, 
+            message: 'Mã này đã tồn tại và đang chờ sử dụng.' 
+        });
+    }
+
+    // Nếu chưa có thì mới tiến hành tạo Token mới như cũ
+    const token = generateRandomToken(15); 
+    const newEntry = {
+        realCode,
+        token,
+        sheetName,
         status: 'active',
         createdAt: new Date().toISOString()
-    });
+    };
+
+    db.push(newEntry);
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    res.json({ status: 'success' });
+    
+    res.json({ success: true, token });
 });
 
 // --- 2. API: KIỂM TRA MÃ (ChecklistApp) ---
