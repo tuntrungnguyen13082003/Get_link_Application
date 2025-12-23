@@ -51,29 +51,34 @@ app.post('/api/create-link', (req, res) => {
 });
 
 // --- 2. API: KIỂM TRA MÃ (ChecklistApp) ---
+// --- API KIỂM TRA MÃ (3 LỚP BẢO MẬT) ---
 app.post('/api/check-status', (req, res) => {
-    // Nhận cả token và sheetName từ Frontend gửi lên
-    const { token, sheetName } = req.body; 
-    
-    const db = JSON.parse(fs.readFileSync(DB_PATH));
-    
-    // Tìm mã khớp cả Token VÀ SheetName
-    const entry = db.find(item => item.token === token && item.sheetName === sheetName);
-    
-    if (!entry) {
-        return res.json({ result: 'invalid', message: 'Mã không tồn tại hoặc sai ứng dụng' });
-    }
+    try {
+        const { token, sheetName } = req.body;
+        
+        // Đọc dữ liệu mới nhất từ file
+        const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+        
+        // 1. Tìm bản ghi khớp cả Token VÀ tên ứng dụng (SheetName)
+        const entry = db.find(item => item.token === token && item.sheetName === sheetName);
+        
+        if (!entry) {
+            return res.json({ result: 'invalid', message: 'Mã không tồn tại hoặc sai ứng dụng' });
+        }
 
-    // Kiểm tra trạng thái (Active hay đã Used)
-    if (entry.status !== 'active') {
-        return res.json({ result: 'used', message: 'Mã này đã được sử dụng trước đó' });
-    }
+        // 2. Kiểm tra trạng thái (Status)
+        if (entry.status !== 'active') {
+            return res.json({ result: 'used', message: 'Mã này đã được sử dụng' });
+        }
 
-    // Nếu vượt qua tất cả, trả về thành công và mã thật
-    res.json({ 
-        result: 'active', 
-        realCode: entry.realCode 
-    });
+        // 3. Nếu mọi thứ hợp lệ
+        res.json({ 
+            result: 'active', 
+            realCode: entry.realCode 
+        });
+    } catch (error) {
+        res.status(500).json({ result: 'error', message: error.message });
+    }
 });
 
 // --- 3. API: NHẬN BÁO CÁO & KHÓA MÃ ---
