@@ -22,14 +22,33 @@ if (!fs.existsSync(DB_PATH)) {
 }
 
 // --- CẤU HÌNH LƯU FILE ZIP ---
+// --- CẤU HÌNH LƯU FILE ZIP THEO SHEETNAME ---
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const { type, appName } = req.body;
-        const dir = path.join(UPLOADS_DIR, type || 'anh_chup', appName || 'default');
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        // 1. Lấy token từ body gửi lên
+        const { token } = req.body;
+        let folderName = 'default';
+        try {
+            // 2. Đọc database để tìm sheetName tương ứng với token này
+            const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+            const entry = db.find(item => item.token === token);
+            if (entry && entry.sheetName) {
+                folderName = entry.sheetName; // Ví dụ: 'SOLAR'
+            }
+        } catch (error) {
+            console.error("Không thể đọc database để xác định thư mục:", error);
+        }
+        // 3. Tạo đường dẫn thư mục: uploads/SOLAR/ (hoặc tên sheet khác)
+        // Tôi bỏ bớt cấp 'anh_chup' để folder của bạn gọn hơn như ý bạn muốn
+        const dir = path.join(UPLOADS_DIR, folderName);
+        // 4. Nếu thư mục chưa có thì tự động tạo (recursive: true)
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
         cb(null, dir);
     },
     filename: (req, file, cb) => {
+        // Giữ nguyên tên file gốc của bạn
         cb(null, file.originalname);
     }
 });
