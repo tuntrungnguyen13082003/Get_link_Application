@@ -8,7 +8,7 @@ const AdminPage = () => {
   const ADMIN_PASS = "admin";
   
   // THAY ĐỔI TẠI ĐÂY: Trỏ về cổng 3001 của Server Ubuntu thay vì Google Script
-  const BACKEND_URL = "http://192.168.3.244:3001/api"; 
+  const BACKEND_URL = "http://solar-field.ddns.net:3001/api"; 
 
   useEffect(() => {
     document.title = "Get Link Sys";
