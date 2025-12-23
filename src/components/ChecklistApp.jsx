@@ -1,14 +1,8 @@
-// src/components/ChecklistApp.jsx
 import React, { useState, useEffect } from 'react';
 import { Camera, ChevronRight, ChevronLeft, Upload, RefreshCw, X, Loader } from 'lucide-react';
 import JSZip from 'jszip';
 
-// Component này nhận vào 3 tham số quan trọng:
-// 1. sheetName: Tên sheet cần check (SOLAR, SU_CO...)
-// 2. reportName: Tiền tố tên file báo cáo (SolarCheckListEvent...)
-// 3. questions: Danh sách câu hỏi và ảnh mẫu
 const ChecklistApp = ({ sheetName, reportName, questions }) => {
-  
   const [currentStep, setCurrentStep] = useState(0); 
   const [userImages, setUserImages] = useState({});
   const [isUploading, setIsUploading] = useState(false);
@@ -16,29 +10,29 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
   const [sessionStatus, setSessionStatus] = useState("checking"); 
   const [realCode, setRealCode] = useState(""); 
 
-  // URL Script (Dùng chung cho cả hệ thống)
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3OorDYwIhshFZE1TENlYXC-TfcfwzZhbshxgltEkFDyca3fCkBR2W8geLOT5-HAwrtQ/exec"; 
+  // THAY ĐỔI: Trỏ về cổng 3001 của Server thay vì Google
+  const BACKEND_URL = "http://solar-field.ddns.net:3001/api"; 
 
   const queryParams = new URLSearchParams(window.location.search);
   const fakeTokenFromUrl = queryParams.get("code"); 
 
-  // --- LOGIC GIỮ NGUYÊN (Chỉ thay biến thành props) ---
+  // --- LOGIC KIỂM TRA MÃ TRÊN SERVER NỘI BỘ ---
   useEffect(() => {
     const checkTokenStatus = async () => {
       if (!fakeTokenFromUrl) {
         setSessionStatus("invalid"); setIsCheckingCode(false); return;
       }
       try {
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
+        const response = await fetch(`${BACKEND_URL}/check-status`, {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-             action: "check_status", 
              token: fakeTokenFromUrl, 
-             sheet_name: sheetName // <--- Dùng props
+             sheet_name: sheetName
           })
         });
         const data = await response.json();
-        setSessionStatus(data.result); 
+        setSessionStatus(data.result); // "active", "used", hoặc "invalid"
         if (data.realCode) setRealCode(data.realCode);
       } catch (error) {
         setSessionStatus("error");
@@ -67,6 +61,7 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
     }
   };
 
+  // --- HÀM GỬI BÁO CÁO VỀ THƯ MỤC TRÊN SERVER ---
   const uploadReport = async () => {
     if (Object.keys(userImages).length === 0 && !window.confirm("Gửi báo cáo rỗng?")) return;
     setIsUploading(true);
@@ -74,71 +69,66 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
       const now = new Date();
       const datePrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
       const finalCode = String(realCode || "Unknown").trim(); 
-      // Dùng props reportName
       const zipFileName = `${datePrefix}_${reportName}_${finalCode}.zip`;
       
       const zip = new JSZip();
       const imgFolder = zip.folder(`${reportName}_${finalCode}`);
       
-      // Dùng props questions
       questions.forEach(q => {
         if (userImages[q.id]) imgFolder.file(`${q.id}.jpg`, userImages[q.id].split(',')[1], { base64: true });
       });
-      const content = await zip.generateAsync({ type: "base64" });
+      const zipBlob = await zip.generateAsync({ type: "blob" });
       
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
+      // Dùng FormData để gửi file thật sự sang Backend
+      const formData = new FormData();
+      formData.append('file', zipBlob, zipFileName);
+      formData.append('type', 'anh_chup'); // Phân loại vào folder anh_chup
+      formData.append('appName', sheetName); // Tên folder ứng dụng (vd: SOLAR)
+      formData.append('token', fakeTokenFromUrl); // Để server đánh dấu mã này đã dùng
+
+      const response = await fetch(`${BACKEND_URL}/upload-report`, {
         method: "POST",
-        body: JSON.stringify({
-            filename: zipFileName, 
-            fileData: content,
-            token: finalCode, 
-            sheet_name: sheetName // <--- Dùng props
-        })
+        body: formData // Gửi trực tiếp file Zip
       });
 
       const result = await response.json();
       if (result.status === 'success') {
-          alert("✅ Báo cáo đã gửi thành công!");
+          alert("✅ Báo cáo đã gửi và lưu về server thành công!");
           setSessionStatus("used");
       } else throw new Error(result.message);
     } catch (error) {
-      alert("❌ Lỗi: " + error.message);
+      alert("❌ Lỗi gửi báo cáo: " + error.message);
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleNextOrSubmit = () => {
-      // Dùng props questions.length
       const isLastStep = currentStep === questions.length - 1;
       if (isLastStep) uploadReport();
       else setCurrentStep(currentStep + 1);
   };
 
-  // --- GIAO DIỆN ---
-  // --- MÀN HÌNH CHỜ (LOADING) ---
+  // --- GIAO DIỆN (GIỮ NGUYÊN HOÀN TOÀN) ---
   if (isCheckingCode) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
          <Loader className="w-10 h-10 text-blue-600 animate-spin mb-4"/>
-         <p className="text-gray-500 font-medium">Đang kiểm tra mã truy cập...</p>
+         <p className="text-gray-500 font-medium">Đang kiểm tra mã truy cập nội bộ...</p>
       </div>
     );
   }
 
-  // --- MÀN HÌNH CHẶN (NẾU MÃ SAI HOẶC ĐÃ DÙNG) ---
   if (sessionStatus !== "active") {
       let message = "Mã truy cập không hợp lệ.";
       let subMsg = "Vui lòng liên hệ quản trị viên để lấy mã mới.";
-      
       if (sessionStatus === "used") {
         message = "Mã này đã được sử dụng!";
-        subMsg = "Báo cáo cho mã này đã được gửi thành công trước đó.";
+        subMsg = "Báo cáo đã được lưu trữ an toàn trên hệ thống máy chủ.";
       } else if (sessionStatus === "error") {
-        message = "Lỗi kết nối máy chủ!";
-        subMsg = "Vui lòng kiểm tra internet và thử lại.";
+        message = "Lỗi kết nối Server!";
+        subMsg = "Vui lòng kiểm tra lại cổng 3001 hoặc liên hệ kỹ thuật.";
       }
-
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 font-sans">
             <div className="bg-white p-8 rounded-2xl shadow-xl max-w-sm text-center border border-gray-200">
@@ -152,25 +142,19 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
       );
   }
 
-  // --- GIAO DIỆN CHÍNH (CHỈ HIỆN KHI status === "active") ---
   const currentQ = questions[currentStep];
   const hasCaptured = !!userImages[currentQ.id];
   const isLastStep = currentStep === questions.length - 1;
 
 return (
     <div className="min-h-screen bg-gray-100 font-sans text-gray-800 flex justify-center items-start pt-0 md:pt-10 pb-0 md:pb-10">
-      
-      {/* Màn hình Loading khi đang gửi */}
       {isUploading && (
         <div className="fixed inset-0 bg-black/80 z-[60] flex flex-col items-center justify-center text-white backdrop-blur-sm">
             <RefreshCw className="w-16 h-16 animate-spin mb-4 text-blue-400"/>
-            <p className="text-xl font-bold">Đang gửi báo cáo...</p>
+            <p className="text-xl font-bold">Đang lưu báo cáo về server...</p>
         </div>
       )}
-
       <div className="w-full max-w-md bg-white md:rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[100vh] md:h-[90vh] relative border border-gray-200">
-        
-        {/* --- HEADER (Tiêu đề & Thanh tiến trình) --- */}
         <div className="bg-white px-6 py-4 border-b border-gray-100 z-20">
             <div className="flex items-center justify-between mb-3">
                 <h2 className="font-bold text-gray-800 text-lg truncate pr-2">
@@ -180,42 +164,24 @@ return (
                     {hasCaptured ? 'Đã xong' : 'Chưa chụp'}
                 </span>
             </div>
-            {/* Thanh tiến trình */}
             <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
                 <div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}></div>
             </div>
         </div>
-
-        {/* --- BODY (Nội dung chính) --- */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-            
-            {/* 1. KHUNG ẢNH MẪU & MÔ TẢ */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                 <p className="text-gray-700 text-sm mb-3 font-medium">{currentQ.desc}</p>
-                
-                {/* LOGIC MỚI: TỰ ĐỘNG CHIA CỘT (GRID/FLEX) */}
-                <div className="bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative group h-48"> {/* Đặt chiều cao cố định h-48 cho khung */}
-                    
+                <div className="bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative group h-48">
                     {Array.isArray(currentQ.refImage) ? (
-                        // TRƯỜNG HỢP NHIỀU ẢNH: Dùng Flexbox để chia đều
-                        <div className="flex w-full h-full gap-1"> {/* gap-1 để tạo khe hở nhỏ giữa các ảnh */}
+                        <div className="flex w-full h-full gap-1">
                             {currentQ.refImage.map((img, index) => (
                                 <div key={index} className="flex-1 h-full relative cursor-pointer group/img">
-                                    {/* flex-1: Tự động co giãn bằng nhau */}
-                                    <img 
-                                        src={img} 
-                                        alt={`Ref ${index}`} 
-                                        className="w-full h-full object-contain bg-gray-200 hover:scale-105 transition-transform duration-300" 
-                                    />
-                                    {/* Số thứ tự nhỏ xíu ở góc để biết ảnh nào là ảnh nào */}
-                                    <div className="absolute bottom-1 right-1 bg-black/40 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full">
-                                        {index + 1}
-                                    </div>
+                                    <img src={img} alt={`Ref ${index}`} className="w-full h-full object-contain bg-gray-200 hover:scale-105 transition-transform duration-300" />
+                                    <div className="absolute bottom-1 right-1 bg-black/40 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full">{index + 1}</div>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        // TRƯỜNG HỢP 1 ẢNH: Hiển thị full như cũ
                         currentQ.refImage ? (
                             <img src={currentQ.refImage} alt="Ref" className="w-full h-full object-contain bg-gray-200"/>
                         ) : (
@@ -223,13 +189,10 @@ return (
                         )
                     )}
                 </div>
-                
                 <p className="text-center text-xs text-gray-400 mt-2 italic">
                     {Array.isArray(currentQ.refImage) ? "Nhấn vào ảnh để xem rõ hơn" : "Ảnh mẫu tham khảo"}
                 </p>
             </div>
-
-            {/* 2. KHUNG CHỤP ẢNH THỰC TẾ */}
             <div className="flex flex-col gap-2">
                 <label className="block text-sm font-bold text-gray-700 ml-1">Ảnh thực tế:</label>
                 <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-sm bg-white border-2 border-dashed border-blue-200 hover:border-blue-400 transition-colors group">
@@ -254,14 +217,11 @@ return (
                 </div>
             </div>
         </div>
-
-        {/* --- FOOTER (Nút điều hướng) --- */}
         <div className="bg-white p-4 border-t border-gray-200 z-30">
             <div className="flex gap-3">
             <button onClick={() => setCurrentStep(Math.max(0, currentStep - 1))} disabled={currentStep === 0 || isUploading} className="px-4 py-3 rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30">
                 <ChevronLeft size={24} />
             </button>
-            
             <button onClick={handleNextOrSubmit} disabled={isUploading} className={`flex-1 py-3 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all ${isLastStep ? 'bg-green-600 hover:bg-green-700' : (hasCaptured ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400')}`}>
                 {isLastStep ? <><Upload size={20}/> GỬI BÁO CÁO</> : (hasCaptured ? <>Tiếp theo <ChevronRight size={20}/></> : <>Bỏ qua <ChevronRight size={20}/></>)}
             </button>

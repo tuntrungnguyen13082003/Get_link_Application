@@ -2,28 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { Lock, User, Key, LogIn, LogOut } from 'lucide-react';
 import { APP_DATA } from './ChecklistPage';
 
-
 const AdminPage = () => {
   // --- CẤU HÌNH ---
   const ADMIN_USER = "admin";
   const ADMIN_PASS = "admin";
-  // Link Script của bạn (Phiên bản mới nhất đã update)
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3OorDYwIhshFZE1TENlYXC-TfcfwzZhbshxgltEkFDyca3fCkBR2W8geLOT5-HAwrtQ/exec"; 
+  
+  // THAY ĐỔI TẠI ĐÂY: Trỏ về cổng 3001 của Server Ubuntu thay vì Google Script
+  const BACKEND_URL = "http://solar-field.ddns.net:3001/api"; 
 
   useEffect(() => {
-    document.title = "Get Link Sys"; // Đổi tên tab thành Get Link
+    document.title = "Get Link Sys";
   }, []);
-
-  // Tự động lấy tên miền 
-  const CURRENT_DOMAIN = window.location.origin;
 
   const AVAILABLE_APPS = Object.values(APP_DATA).map(app => ({
     id: app.id,
     name: app.name,
     sheetName: app.sheetName,
-    // Tự động ghép link: domain hiện tại + /Checklist/ + id của app
     url: `${window.location.origin}/#/checklist/${app.id}`
-}));
+  }));
 
   // --- STATE ---
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -57,6 +53,7 @@ const AdminPage = () => {
     return result;
   };
 
+  // --- HÀM TẠO LINK (ĐÃ SỬA ĐỂ GỬI VỀ SERVER UBUNTU) ---
   const handleCreateLink = async () => {
     if (!selectedApp) return alert("Vui lòng chọn ứng dụng trước!");
     if (!code.trim()) return alert("Vui lòng nhập mã báo cáo!");
@@ -64,16 +61,19 @@ const AdminPage = () => {
     setIsLoading(true);
     setGeneratedLink('');
 
-    const rawCode = code.trim().toUpperCase(); // Mã thật
-    const randomToken = generateRandomToken(15); // Mã fake
-    const finalLink = `${selectedApp.url}?code=${randomToken}`; // Link fake
+    const rawCode = code.trim().toUpperCase();
+    const randomToken = generateRandomToken(15);
+    const finalLink = `${selectedApp.url}?code=${randomToken}`;
 
     try {
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
+      // Gửi yêu cầu lưu mã vào database.json trên máy chủ
+      const response = await fetch(`${BACKEND_URL}/create-link`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "create_link",
-          code: rawCode,       
+          code: rawCode,
+          token: randomToken,       
           full_link: finalLink,
           sheet_name: selectedApp.sheetName 
         })
@@ -82,30 +82,32 @@ const AdminPage = () => {
       const result = await response.json();
       if (result.status === 'success') {
         setGeneratedLink(finalLink);
-        alert(`✅ Đã tạo mã thành công`);
+        alert(`✅ Đã tạo mã và lưu vào máy chủ thành công`);
         
-        navigator.clipboard.writeText(finalLink).then(() => {
-             // không cần alert cũng được vì giao diện đã báo "Đã tự động copy"
-        }).catch(err => {
-             console.error('Không thể tự động copy:', err);
-        });
-
+        // Xử lý Clipboard an toàn cho HTTP
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(finalLink).catch(err => console.error(err));
+        }
       } else {
-        alert("Lỗi Sheet: " + result.message);
+        alert("Lỗi Server: " + result.message);
       }
     } catch (error) {
-      alert("Lỗi kết nối: " + error.message);
+      alert("Lỗi kết nối Server (Cổng 3001): " + error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedLink);
-    alert("✅ Đã copy link!");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(generatedLink);
+        alert("✅ Đã copy link!");
+    } else {
+        alert("Tính năng copy bị trình duyệt chặn trên HTTP. Vui lòng copy thủ công.");
+    }
   };
 
-  // --- GIAO DIỆN ---
+  // --- GIAO DIỆN GIỮ NGUYÊN 100% ---
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 font-sans">
@@ -135,24 +137,20 @@ const AdminPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-slate-100 font-sans">
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
-        
-        {/* HEADER */}
         <div className="bg-blue-600 p-6 text-center text-white relative">
           <h1 className="text-2xl font-bold uppercase tracking-wider">Hệ Thống Get Link</h1>
           <button onClick={handleLogout} className="absolute top-6 right-6 p-2 bg-blue-700 rounded-full hover:bg-blue-800 text-xs flex items-center gap-1">
             <LogOut size={16}/>
           </button>
         </div>
-
         <div className="p-8 space-y-6">
-          {/* 1. CHỌN ỨNG DỤNG */}
           <div>
             <label className="block text-sm font-bold text-slate-700 mb-2">1. CHỌN ỨNG DỤNG</label>
             <select 
               className="w-full p-4 bg-white border-2 border-slate-200 rounded-xl outline-none focus:border-blue-500 font-medium cursor-pointer" 
               onChange={(e) => { 
                   setSelectedApp(AVAILABLE_APPS.find(app => app.id === e.target.value)); 
-                  setGeneratedLink(''); // Reset link khi đổi app
+                  setGeneratedLink(''); 
               }} 
               defaultValue=""
             >
@@ -160,26 +158,20 @@ const AdminPage = () => {
               {AVAILABLE_APPS.map((app) => (<option key={app.id} value={app.id}>{app.name}</option>))}
             </select>
           </div>
-
-          {/* 2. NHẬP MÃ & NÚT BẤM */}
           {selectedApp && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-300">
               <label className="block text-sm font-bold text-slate-700 mb-2">2. NHẬP MÃ ({selectedApp.sheetName})</label>
-              
-              {/* SỬA Ở ĐÂY: Thêm onFocus và sửa onChange để reset link */}
               <input 
                 type="text" 
                 value={code} 
-                onFocus={() => setGeneratedLink('')} // <--- Click vào là reset link, hiện lại nút
+                onFocus={() => setGeneratedLink('')} 
                 onChange={(e) => {
                     setCode(e.target.value);
-                    if (generatedLink) setGeneratedLink(''); // <--- Gõ phím cũng reset link
+                    if (generatedLink) setGeneratedLink(''); 
                 }} 
                 placeholder="VD: MAY-A-NGAY-B" 
                 className="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-xl outline-none focus:border-blue-500 text-lg font-bold uppercase"
               />
-
-              {/* SỬA Ở ĐÂY: Chỉ hiện nút khi CHƯA CÓ link (!generatedLink) */}
               {!generatedLink && (
                   <button 
                     onClick={handleCreateLink} 
@@ -191,8 +183,6 @@ const AdminPage = () => {
               )}
             </div>
           )}
-
-          {/* 3. KẾT QUẢ LINK */}
           {generatedLink && (
             <div className="mt-6 animate-pulse">
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-3 relative">
@@ -204,8 +194,6 @@ const AdminPage = () => {
                     {generatedLink}
                 </div>
               </div>
-              
-              {/* Vẫn giữ nút copy thủ công phòng hờ */}
               <button onClick={copyToClipboard} className="w-full bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-black transition-colors">
                 COPY LINK LẠI
               </button>
@@ -218,4 +206,3 @@ const AdminPage = () => {
 };
 
 export default AdminPage;
-
