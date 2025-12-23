@@ -10,7 +10,7 @@ const App = () => {
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/admin" replace />} />
+        <Route path="/" element={<Navigate to="/server" replace />} />
         <Route path="/admin" element={<AdminPage />} />
         
         {/* DÒNG QUAN TRỌNG: :appId là biến động */}
