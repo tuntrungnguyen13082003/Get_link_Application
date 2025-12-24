@@ -198,3 +198,35 @@ app.post('/api/create-user', (req, res) => {
     fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
     res.json({ status: 'success', message: 'Tạo tài khoản mới thành công!' });
 });
+
+// --- 7. API: LẤY DANH SÁCH USER (Chỉ trả về tên và quyền, giấu mật khẩu) ---
+app.get('/api/users', (req, res) => {
+    try {
+        const users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf8'));
+        // Chỉ lấy username và role, không gửi password về client
+        const safeUsers = users.map(u => ({ username: u.username, role: u.role || 'staff' }));
+        res.json({ status: 'success', users: safeUsers });
+    } catch (e) {
+        res.status(500).json({ status: 'error', message: 'Lỗi đọc danh sách user' });
+    }
+});
+
+// --- 8. API: XÓA USER (Chỉ Admin) ---
+app.post('/api/delete-user', (req, res) => {
+    const { targetUser } = req.body; // Tên người cần xóa
+    let users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf8'));
+
+    // Không cho phép xóa user admin gốc
+    if (targetUser === 'admin') {
+        return res.json({ status: 'error', message: 'Không thể xóa tài khoản Admin gốc!' });
+    }
+
+    const newUsers = users.filter(u => u.username !== targetUser);
+    
+    if (newUsers.length === users.length) {
+        return res.json({ status: 'error', message: 'User không tồn tại' });
+    }
+
+    fs.writeFileSync(USERS_PATH, JSON.stringify(newUsers, null, 2));
+    res.json({ status: 'success', message: 'Đã xóa tài khoản thành công!' });
+});
