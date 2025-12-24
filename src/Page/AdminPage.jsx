@@ -5,7 +5,7 @@ import { APP_DATA } from './ChecklistPage';
 const AdminPage = () => {
   const BACKEND_URL = "http://solar-field.ddns.net:17004/api"; 
   
-  useEffect(() => { document.title = "Get Link Dashboard"; }, []);
+  useEffect(() => { document.title = "Get Link System"; }, []);
 
   const AVAILABLE_APPS = Object.values(APP_DATA).map(app => ({
     id: app.id, name: app.name, sheetName: app.sheetName,
