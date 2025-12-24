@@ -82,12 +82,10 @@ const AdminPage = () => {
       const result = await response.json();
       if (result.status === 'success') {
         setGeneratedLink(finalLink);
-        alert(`✅ Đã tạo mã và lưu vào máy chủ thành công`);
+        alert(`✅ Đã tạo mã thành công`);
         
-        // Xử lý Clipboard an toàn cho HTTP
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(finalLink).catch(err => console.error(err));
-        }
+        // GỌI HÀM COPY MỚI TẠI ĐÂY
+        handleCopy(finalLink); 
       } else {
         alert("Lỗi Server: " + result.message);
       }
@@ -98,13 +96,48 @@ const AdminPage = () => {
     }
   };
 
-  const copyToClipboard = () => {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(generatedLink);
-        alert("✅ Đã copy link!");
+// --- HÀM COPY MỚI (CHẠY ĐƯỢC CẢ HTTP VÀ HTTPS) ---
+  const handleCopy = (textToCopy) => {
+    // Ưu tiên 1: Dùng API hiện đại (Chỉ chạy trên HTTPS hoặc Localhost)
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(textToCopy)
+        .then(() => { /* Đã copy thành công */ })
+        .catch((err) => {
+          console.error("Lỗi API mới, chuyển sang cách cũ...", err);
+          fallbackCopyTextToClipboard(textToCopy);
+        });
     } else {
-        alert("Tính năng copy bị trình duyệt chặn trên HTTP. Vui lòng copy thủ công.");
+      // Ưu tiên 2: Dùng cách cũ (Chạy tốt trên HTTP)
+      fallbackCopyTextToClipboard(textToCopy);
     }
+  };
+
+  const fallbackCopyTextToClipboard = (text) => {
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+    
+    // Giấu ô nhập liệu đi để không làm xấu giao diện
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      var successful = document.execCommand('copy');
+      if (successful) {
+        // alert("✅ Đã copy link (Chế độ HTTP)!"); 
+      } else {
+        alert("❌ Trình duyệt không cho phép copy tự động.");
+      }
+    } catch (err) {
+      console.error('Không thể copy', err);
+      alert("Hãy bôi đen và copy link thủ công!");
+    }
+
+    document.body.removeChild(textArea);
   };
 
   // --- GIAO DIỆN GIỮ NGUYÊN 100% ---
@@ -194,7 +227,9 @@ const AdminPage = () => {
                     {generatedLink}
                 </div>
               </div>
-              <button onClick={copyToClipboard} className="w-full bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-black transition-colors">
+              <button onClick={() => { handleCopy(generatedLink); // Gọi hàm mới
+                alert("✅ Đã copy link!"); // Thông báo cho người dùng biết 
+                }} className="w-full bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-black transition-colors">
                 COPY LINK LẠI
               </button>
             </div>
