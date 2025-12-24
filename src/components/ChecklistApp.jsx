@@ -244,7 +244,7 @@ return (
                 <ChevronLeft size={24} />
             </button>
             <button onClick={handleNextOrSubmit} disabled={isUploading} className={`flex-1 py-3 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all ${isLastStep ? 'bg-green-600 hover:bg-green-700' : (hasCaptured ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400')}`}>
-                {isLastStep ? <><Upload size={20}/> GỬI BÁO CÁO</> : (hasCaptured ? <>Tiếp theo <ChevronRight size={20}/></> : <>Bỏ qua <ChevronRight size={20}/></>)}
+                {isLastStep ? <><Upload size={20}/> HOÀN THÀNH</> : (hasCaptured ? <>Tiếp theo <ChevronRight size={20}/></> : <>Bỏ qua <ChevronRight size={20}/></>)}
             </button>
             </div>
         </div>

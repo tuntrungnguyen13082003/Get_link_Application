@@ -35,28 +35,51 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // --- 1. API: TẠO MÃ MỚI (Admin) ---
+// app.post('/api/create-link', (req, res) => {
+//     // Nhận dữ liệu từ Admin gửi lên (Lưu ý: Admin gửi 'code', 'token', 'sheet_name')
+//     const { code, token, sheet_name } = req.body;
+    
+//     // 1. Đọc database hiện có
+//     const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+
+//     // 2. KIỂM TRA TRÙNG: Tìm xem đã có mã này cho ứng dụng này mà vẫn đang 'active' chưa
+//     const isDuplicate = db.find(item => 
+//         item.realCode === code && 
+//         item.sheetName === sheet_name
+//     );
+
+//     if (isDuplicate) {
+//         // Nếu trùng, trả về lỗi để Admin hiển thị thông báo "Hãy chọn mã mới"
+//         return res.json({ 
+//             status: 'error', 
+//             message: 'Mã này đã tồn tại, vui lòng chọn mã khác!' 
+//         });
+//     }
+
+//     // 3. Nếu không trùng, tiến hành lưu như bình thường
+//     db.push({
+//         realCode: code,
+//         token: token,
+//         sheetName: sheet_name,
+//         status: 'active',
+//         createdAt: new Date().toISOString()
+//     });
+
+//     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    
+//     // Trả về thành công để Admin biết và hiện link
+//     res.json({ status: 'success' });
+// });
+// --- 1. API: TẠO MÃ MỚI (Admin) ---
+// Đã xóa logic kiểm tra trùng theo yêu cầu mới
 app.post('/api/create-link', (req, res) => {
-    // Nhận dữ liệu từ Admin gửi lên (Lưu ý: Admin gửi 'code', 'token', 'sheet_name')
+    // Nhận dữ liệu từ Admin gửi lên
     const { code, token, sheet_name } = req.body;
     
     // 1. Đọc database hiện có
     const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
 
-    // 2. KIỂM TRA TRÙNG: Tìm xem đã có mã này cho ứng dụng này mà vẫn đang 'active' chưa
-    const isDuplicate = db.find(item => 
-        item.realCode === code && 
-        item.sheetName === sheet_name
-    );
-
-    if (isDuplicate) {
-        // Nếu trùng, trả về lỗi để Admin hiển thị thông báo "Hãy chọn mã mới"
-        return res.json({ 
-            status: 'error', 
-            message: 'Mã này đã tồn tại, vui lòng chọn mã khác!' 
-        });
-    }
-
-    // 3. Nếu không trùng, tiến hành lưu như bình thường
+    // 2. KHÔNG KIỂM TRA TRÙNG NỮA -> Cứ thế lưu luôn
     db.push({
         realCode: code,
         token: token,
@@ -65,9 +88,10 @@ app.post('/api/create-link', (req, res) => {
         createdAt: new Date().toISOString()
     });
 
+    // 3. Ghi lại vào file
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
     
-    // Trả về thành công để Admin biết và hiện link
+    // Trả về thành công luôn
     res.json({ status: 'success' });
 });
 
