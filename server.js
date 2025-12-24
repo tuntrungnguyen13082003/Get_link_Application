@@ -16,6 +16,14 @@ const __dirname = path.dirname(__filename);
 const DB_PATH = path.join(__dirname, 'database.json');
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 
+const USERS_PATH = path.join(__dirname, 'users.json');
+
+// --- HÀM KHỞI TẠO FILE USER (Tạo mặc định 1 admin nếu chưa có) ---
+if (!fs.existsSync(USERS_PATH)) {
+    const defaultUser = [{ username: "admin", password: "admin", role: "admin" }];
+    fs.writeFileSync(USERS_PATH, JSON.stringify(defaultUser, null, 2));
+}
+
 // --- HÀM KHỞI TẠO FILE DỮ LIỆU ---
 if (!fs.existsSync(DB_PATH)) {
     fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2));
@@ -142,4 +150,51 @@ app.post('/api/upload-report', upload.single('file'), (req, res) => {
 
 app.listen(17004, '0.0.0.0', () => {
     console.log('✅ Backend Server đang chạy tại cổng 17004 (ES Module mode)');
+});
+
+// --- 4. API: ĐĂNG NHẬP ---
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    const users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf8'));
+    
+    // Tìm user khớp cả tên lẫn pass
+    const user = users.find(u => u.username === username && u.password === password);
+    
+    if (user) {
+        res.json({ status: 'success', user: { username: user.username, role: user.role } });
+    } else {
+        res.json({ status: 'error', message: 'Sai tên đăng nhập hoặc mật khẩu!' });
+    }
+});
+
+// --- 5. API: ĐỔI MẬT KHẨU ---
+app.post('/api/change-password', (req, res) => {
+    const { username, oldPassword, newPassword } = req.body;
+    const users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf8'));
+    
+    const index = users.findIndex(u => u.username === username);
+    
+    if (index === -1) return res.json({ status: 'error', message: 'User không tồn tại' });
+    
+    if (users[index].password !== oldPassword) {
+        return res.json({ status: 'error', message: 'Mật khẩu cũ không đúng' });
+    }
+
+    users[index].password = newPassword;
+    fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
+    res.json({ status: 'success', message: 'Đổi mật khẩu thành công!' });
+});
+
+// --- 6. API: TẠO USER MỚI (Chỉ Admin mới tạo được) ---
+app.post('/api/create-user', (req, res) => {
+    const { newUsername, newPassword } = req.body;
+    const users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf8'));
+
+    if (users.find(u => u.username === newUsername)) {
+        return res.json({ status: 'error', message: 'Tên đăng nhập này đã tồn tại!' });
+    }
+
+    users.push({ username: newUsername, password: newPassword, role: 'staff' });
+    fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
+    res.json({ status: 'success', message: 'Tạo tài khoản mới thành công!' });
 });
