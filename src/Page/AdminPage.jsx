@@ -110,13 +110,13 @@ const AdminPage = () => {
 
   // --- LOGIC HELPER ---
   const handleCopy = (text) => {
-    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(()=>alert("Đã copy!")).catch(()=>fallbackCopy(text));
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(()=>alert("Đã tạo mã và copy link!")).catch(()=>fallbackCopy(text));
     else fallbackCopy(text);
   };
   const fallbackCopy = (text) => {
     var ta = document.createElement("textarea"); ta.value = text; ta.style.position="fixed"; 
     document.body.appendChild(ta); ta.focus(); ta.select(); 
-    try { document.execCommand('copy'); alert("Đã copy!"); } catch (e) {}
+    try { document.execCommand('copy'); alert("Đã tạo mã và copy link!"); } catch (e) {}
     document.body.removeChild(ta);
   };
   const generateRandomToken = (l) => {
