@@ -80,14 +80,14 @@ const AdminDashboard = ({ currentUser, apps }) => {
         // 👇👇👇 DÁN ID FOLDER TỔNG CỦA BẠN VÀO ĐÂY 👇👇👇
         const PARENT_FOLDER_ID = "1rApCukRbxjEXLSN7zIFW1rmTYZQBoS-9"; 
 
-        // Câu lệnh tìm kiếm: "Tìm folder có tên là [SheetName] nằm trong cha là [ParentID]"
-        // Cú pháp search của Google Drive: parent:ID name:NAME
-        const query = `parent:${PARENT_FOLDER_ID} name:${activeSheet}`;
+//      Cách 1: Mở thẳng Folder Tổng (An toàn nhất, nhìn thấy hết các folder con)
+        const folderUrl = `https://drive.google.com/drive/u/0/folders/${PARENT_FOLDER_ID}`;
         
-        // Tạo link search
-        const driveSearchUrl = `https://drive.google.com/drive/u/0/search?q=${encodeURIComponent(query)}`;
-        
-        window.open(driveSearchUrl, '_blank');
+        // Cách 2: (Nâng cao) Mở và tự động Search tên Sheet trong Folder đó
+        // Nếu bạn thích nó tự lọc luôn thì dùng dòng dưới này (bỏ comment):
+        // const folderUrl = `https://drive.google.com/drive/u/0/search?q=parent:${PARENT_FOLDER_ID}%20name:${activeSheet}`;
+
+        window.open(folderUrl, '_blank');
     };
 
     // 7. Copy Link
