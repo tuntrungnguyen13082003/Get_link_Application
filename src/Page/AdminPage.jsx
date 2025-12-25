@@ -168,15 +168,21 @@ const AdminPage = () => {
     finally { setIsSavingApp(false); }
   };
 
-  const handleDeleteApp = async (id) => {
-    if (!window.confirm(`Xóa ứng dụng ${id}?`)) return;
+  const handleDeleteApp = async (sheetName) => { // 1. Đổi tên tham số từ id -> sheetName cho dễ hiểu
+    if (!window.confirm(`Bạn chắc chắn muốn XÓA ứng dụng có mã "${sheetName}"?`)) return;
     try {
       await fetch(`${BACKEND_URL}/delete-app`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
+        
+        // 👇👇👇 LỖI Ở ĐÂY: Trước đây bạn gửi { id }, giờ phải gửi { sheetName }
+        body: JSON.stringify({ sheetName: sheetName }) 
       });
-      fetchApps();
-      if (editingApp?.sheetName === id) setEditingApp(null);
+      
+      fetchApps(); // Tải lại danh sách
+      
+      // Nếu đang mở đúng app vừa xóa thì đóng form lại
+      if (editingApp?.sheetName === sheetName) setEditingApp(null);
+      
     } catch (e) { alert("Lỗi xóa app!"); }
   };
 
