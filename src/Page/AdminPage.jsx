@@ -309,7 +309,7 @@ const AdminPage = () => {
                         <label className="block text-sm font-bold text-slate-700 mb-2">CHỌN ỨNG DỤNG</label>
                         <select className="w-full p-3 border rounded-xl outline-none focus:border-blue-500 bg-slate-50" 
                             onChange={(e) => { setSelectedAppId(e.target.value); setGeneratedLink(''); }} value={selectedAppId}>
-                            {apps.map((app) => (<option key={app.id} value={app.id}>{app.name}</option>))}
+                            {apps.map((app) => (<option key={app.id} value={app.id}> {app.icon} {app.name}</option>))}
                         </select>
                     </div>
                     <div>
