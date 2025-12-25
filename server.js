@@ -22,7 +22,7 @@ const USERS_PATH = path.join(__dirname, 'users.json');
 const APPS_PATH = path.join(__dirname, 'apps.json');
 const CONFIG_IMAGES_DIR = path.join(__dirname, 'uploads', 'config_images');
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxx/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyICx-t7Q7JdaBu1puFflC5ILZEsYbHB6eEfnz0ToCFoi-jEw8nNRDTC_hS7rGkREYsA/exec";
 
 // 1. Tạo folder chứa ảnh minh họa (nếu chưa có)
 if (!fs.existsSync(CONFIG_IMAGES_DIR)) {
