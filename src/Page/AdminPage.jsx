@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, LogOut, UserPlus, Settings, Trash2, Shield, User, Key, Link as LinkIcon, Plus, Save, Image as ImageIcon, X, LayoutGrid } from 'lucide-react';
 
-// XÓA DÒNG IMPORT APP_DATA CŨ ĐI VÌ GIỜ MÌNH DÙNG API
-// import { APP_DATA } from './ChecklistPage'; 
+const APP_ICONS = [
+    "📝", "📸", "⚠️", "⚡", "🔧", "🧯", "🏭", "🔋", "✅", "🚒", "🏗️", "🔌", "💧", "🚲", "🚗", "🛡️"
+];
 
 const AdminPage = () => {
   const BACKEND_URL = "http://solar-field.ddns.net:17004/api"; 
@@ -140,7 +141,12 @@ const AdminPage = () => {
   // Các hàm hỗ trợ Builder
   const handleNewApp = () => {
     setEditingApp({
-      id: '', name: 'Ứng dụng mới', sheetName: 'NEW_SHEET', reportName: 'Report_Name', tabTitle: 'New Checklist',
+      id: '', 
+      icon: '📝', // <--- QUAN TRỌNG: Thêm dòng này vào đây
+      name: 'Ứng dụng mới', 
+      sheetName: 'NEW_SHEET', 
+      reportName: 'Report_Name', 
+      tabTitle: 'New Checklist',
       questions: []
     });
   };
@@ -341,8 +347,15 @@ const AdminPage = () => {
                         {apps.map(app => (
                             <div key={app.id} onClick={() => setEditingApp(app)} 
                                 className={`flex justify-between items-center p-3 rounded-xl cursor-pointer border transition-all ${editingApp?.id === app.id ? 'bg-green-50 border-green-500' : 'bg-slate-50 border-transparent hover:bg-slate-100'}`}>
-                                <span className="font-bold text-slate-700 truncate flex-1">{app.name}</span>
-                                <button onClick={(e) => {e.stopPropagation(); handleDeleteApp(app.id);}} className="text-slate-400 hover:text-red-500 p-1"><Trash2 size={16}/></button>
+                                
+                                {/* 👇👇👇 THAY ĐỔI Ở ĐÂY: Thêm {app.icon} vào trước tên 👇👇👇 */}
+                                <span className="font-bold text-slate-700 truncate flex-1">
+                                    {app.icon} {app.name}
+                                </span>
+                                
+                                <button onClick={(e) => {e.stopPropagation(); handleDeleteApp(app.id);}} className="text-slate-400 hover:text-red-500 p-1">
+                                    <Trash2 size={16}/>
+                                </button>
                             </div>
                         ))}
                     </div>
@@ -360,12 +373,74 @@ const AdminPage = () => {
                             </div>
                             
                             {/* Thông tin chung */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <div><label className="text-xs font-bold text-slate-500">ID </label><input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" value={editingApp.id} onChange={e => setEditingApp({...editingApp, id: e.target.value})} placeholder="vd: solar_da_nang"/></div>
-                                <div><label className="text-xs font-bold text-slate-500">Tên ứng dụng</label><input className="w-full p-2 border rounded-lg mt-1 bg-white" value={editingApp.name} onChange={e => setEditingApp({...editingApp, name: e.target.value})} placeholder="vd: Báo cáo Solar"/></div>
-                                <div><label className="text-xs font-bold text-slate-500">SheetName (Folder báo cáo)</label><input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" value={editingApp.sheetName} onChange={e => setEditingApp({...editingApp, sheetName: e.target.value})} placeholder="vd: SOLAR_DN"/></div>
-                                <div><label className="text-xs font-bold text-slate-500 uppercase">ReportName (Tên file xuất ra)</label><input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" value={editingApp.reportName || ''} onChange={e => setEditingApp({...editingApp, reportName: e.target.value})} placeholder="vd: SolarCheckListEvent"/></div>
-                                <div><label className="text-xs font-bold text-slate-500">Tab Title</label><input className="w-full p-2 border rounded-lg mt-1 bg-white" value={editingApp.tabTitle} onChange={e => setEditingApp({...editingApp, tabTitle: e.target.value})} placeholder="vd: Checklist Bảo Trì"/></div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase">ID (Folder ảnh)</label>
+                                    <input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" 
+                                        value={editingApp.id} onChange={e => setEditingApp({...editingApp, id: e.target.value})} 
+                                        placeholder="vd: solar_da_nang"/>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase">SheetName (Folder báo cáo)</label>
+                                    <input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" 
+                                        value={editingApp.sheetName} onChange={e => setEditingApp({...editingApp, sheetName: e.target.value})} 
+                                        placeholder="vd: SOLAR_DN"/>
+                                </div>
+                            </div>
+
+                            {/* Dòng 2: CHỌN ICON VÀ TÊN HIỂN THỊ (ĐÂY LÀ PHẦN QUAN TRỌNG BẠN CẦN) */}
+                            <div className="mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Biểu tượng & Tên ứng dụng</label>
+                                <div className="flex flex-col md:flex-row gap-4 items-start">
+                                    
+                                    {/* Phần chọn Icon */}
+                                    <div className="w-full md:w-auto">
+                                        <div className="grid grid-cols-8 md:grid-cols-4 gap-2">
+                                            {APP_ICONS.map((ico) => (
+                                                <button 
+                                                    key={ico}
+                                                    onClick={() => setEditingApp({...editingApp, icon: ico})}
+                                                    className={`w-10 h-10 flex items-center justify-center text-xl rounded-lg border transition-all ${
+                                                        editingApp.icon === ico 
+                                                        ? 'bg-blue-100 border-blue-500 shadow-sm scale-110' 
+                                                        : 'bg-white border-slate-200 hover:bg-slate-100'
+                                                    }`}
+                                                >
+                                                    {ico}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Phần nhập tên (Text) */}
+                                    <div className="flex-1 w-full">
+                                        <input 
+                                            className="w-full p-3 border rounded-xl font-bold text-lg text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none" 
+                                            value={editingApp.name} 
+                                            onChange={e => setEditingApp({...editingApp, name: e.target.value})} 
+                                            placeholder="Nhập tên ứng dụng (VD: Báo cáo Solar)"
+                                        />
+                                        <p className="text-xs text-slate-400 mt-1">
+                                            Hiển thị thực tế: <span className="font-bold text-slate-800">{editingApp.icon} {editingApp.name}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Dòng 3: Report Name và Tab Title (Giữ nguyên logic cũ) */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Report Name (File xuất ra)</label>
+                                    <input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" 
+                                        value={editingApp.reportName || ''} onChange={e => setEditingApp({...editingApp, reportName: e.target.value})} 
+                                        placeholder="vd: SolarCheckListEvent"/>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500">Tiêu đề Tab</label>
+                                    <input className="w-full p-2 border rounded-lg mt-1 bg-white" 
+                                        value={editingApp.tabTitle} onChange={e => setEditingApp({...editingApp, tabTitle: e.target.value})} 
+                                        placeholder="vd: Checklist Bảo Trì"/>
+                                </div>
                             </div>
 
                             {/* Danh sách câu hỏi */}
