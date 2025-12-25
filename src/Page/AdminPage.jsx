@@ -372,117 +372,80 @@ const AdminPage = () => {
                 <div className="flex-1 bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
                     {editingApp ? (
                         <div>
-                            <div className="flex justify-between items-center mb-6 pb-4 border-b">
-                                <h2 className="text-xl font-bold text-slate-700">✏️ {editingApp.name}</h2>
-                                <button onClick={handleSaveApp} disabled={isSavingApp} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 flex items-center gap-2 shadow">
-                                    {isSavingApp ? "Đang lưu..." : <><Save size={18}/> LƯU CẤU HÌNH</>}
-                                </button>
-                            </div>
-                            
-                            {/* Thông tin chung */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase">ID (Folder ảnh)</label>
-                                    <input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" 
-                                        value={editingApp.sheetName} onChange={e => setEditingApp({...editingApp, id: e.target.value})} 
-                                        placeholder="vd: solar_da_nang"/>
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase">SheetName (Folder báo cáo)</label>
-                                    <input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" 
-                                        value={editingApp.sheetName} onChange={e => setEditingApp({...editingApp, sheetName: e.target.value})} 
-                                        placeholder="vd: SOLAR_DN"/>
-                                </div>
-                            </div>
+                          <div className="flex justify-between items-center mb-6 pb-4 border-b">
+                              <h2 className="text-xl font-bold text-slate-700">✏️ {editingApp.name}</h2>
+                              <button onClick={handleSaveApp} disabled={isSavingApp} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 flex items-center gap-2 shadow">
+                                  {isSavingApp ? "Đang lưu..." : <><Save size={18}/> LƯU CẤU HÌNH</>}
+                              </button>
+                          </div>
+                          
+                          {/* --- 1. MÃ ỨNG DỤNG (SHEETNAME) --- */}
+                          {/* Đây là ô quan trọng nhất, thay thế cho ID cũ */}
+                          <div className="mb-4">
+                              <label className="text-xs font-bold text-slate-500 uppercase">Mã Ứng Dụng (Viết liền không dấu)</label>
+                              <input className="w-full p-3 border rounded-xl mt-1 font-mono bg-blue-50 border-blue-200 text-blue-800 font-bold" 
+                                  value={editingApp.sheetName} 
+                                  onChange={e => setEditingApp({...editingApp, sheetName: e.target.value})} 
+                                  placeholder="VD: SOLAR"
+                              />
+                              <p className="text-[11px] text-slate-400 mt-1 italic">
+                                  * Mã này dùng để định danh, tạo tên Folder ảnh và tên Sheet báo cáo.
+                              </p>
+                          </div>
 
-                            {/* Dòng 2: CHỌN ICON VÀ TÊN HIỂN THỊ (ĐÂY LÀ PHẦN QUAN TRỌNG BẠN CẦN) */}
-                            <div className="mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Biểu tượng & Tên ứng dụng</label>
-                                <div className="flex flex-col md:flex-row gap-4 items-start">
-                                    
-                                    {/* Phần chọn Icon */}
-                                    <div className="w-full md:w-auto">
-                                        <div className="grid grid-cols-8 md:grid-cols-4 gap-2">
-                                            {APP_ICONS.map((ico) => (
-                                                <button 
-                                                    key={ico}
-                                                    onClick={() => setEditingApp({...editingApp, icon: ico})}
-                                                    className={`w-10 h-10 flex items-center justify-center text-xl rounded-lg border transition-all ${
-                                                        editingApp.icon === ico 
-                                                        ? 'bg-blue-100 border-blue-500 shadow-sm scale-110' 
-                                                        : 'bg-white border-slate-200 hover:bg-slate-100'
-                                                    }`}
-                                                >
-                                                    {ico}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
+                          {/* --- 2. BIỂU TƯỢNG & TÊN (Giữ nguyên) --- */}
+                          <div className="mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                              <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Giao diện hiển thị</label>
+                              <div className="flex flex-col md:flex-row gap-4 items-start">
+                                  {/* Chọn Icon */}
+                                  <div className="w-full md:w-auto">
+                                      <div className="grid grid-cols-8 md:grid-cols-4 gap-2">
+                                          {APP_ICONS.map((ico) => (
+                                              <button 
+                                                  key={ico}
+                                                  onClick={() => setEditingApp({...editingApp, icon: ico})}
+                                                  className={`w-10 h-10 flex items-center justify-center text-xl rounded-lg border transition-all ${
+                                                      editingApp.icon === ico 
+                                                      ? 'bg-blue-100 border-blue-500 shadow-sm scale-110' 
+                                                      : 'bg-white border-slate-200 hover:bg-slate-100'
+                                                  }`}
+                                              >
+                                                  {ico}
+                                              </button>
+                                          ))}
+                                      </div>
+                                  </div>
 
-                                    {/* Phần nhập tên (Text) */}
-                                    <div className="flex-1 w-full">
-                                        <input 
-                                            className="w-full p-3 border rounded-xl font-bold text-lg text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none" 
-                                            value={editingApp.name} 
-                                            onChange={e => setEditingApp({...editingApp, name: e.target.value})} 
-                                            placeholder="Nhập tên ứng dụng (VD: Báo cáo Solar)"
-                                        />
-                                        <p className="text-xs text-slate-400 mt-1">
-                                            Hiển thị thực tế: <span className="font-bold text-slate-800">{editingApp.icon} {editingApp.name}</span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                                  {/* Nhập Tên */}
+                                  <div className="flex-1 w-full">
+                                      <input 
+                                          className="w-full p-3 border rounded-xl font-bold text-lg text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none" 
+                                          value={editingApp.name} 
+                                          onChange={e => setEditingApp({...editingApp, name: e.target.value})} 
+                                          placeholder="Tên ứng dụng hiển thị"
+                                      />
+                                  </div>
+                              </div>
+                          </div>
 
-                            {/* Dòng 3: Report Name và Tab Title (Giữ nguyên logic cũ) */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase">Report Name (File xuất ra)</label>
-                                    <input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" 
-                                        value={editingApp.reportName || ''} onChange={e => setEditingApp({...editingApp, reportName: e.target.value})} 
-                                        placeholder="vd: SolarCheckListEvent"/>
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-slate-500">Tiêu đề Tab</label>
-                                    <input className="w-full p-2 border rounded-lg mt-1 bg-white" 
-                                        value={editingApp.tabTitle} onChange={e => setEditingApp({...editingApp, tabTitle: e.target.value})} 
-                                        placeholder="vd: Checklist Bảo Trì"/>
-                                </div>
-                            </div>
+                          {/* --- 3. TIÊU ĐỀ TAB --- */}
+                          <div className="mb-6">
+                              <label className="text-xs font-bold text-slate-500 uppercase">Tiêu đề trên Tab trình duyệt</label>
+                              <input className="w-full p-3 border rounded-xl mt-1 bg-white" 
+                                  value={editingApp.tabTitle} onChange={e => setEditingApp({...editingApp, tabTitle: e.target.value})} 
+                                  placeholder="vd: Checklist An Toàn"
+                              />
+                          </div>
 
-                            {/* Danh sách câu hỏi */}
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="font-bold text-slate-700">DANH SÁCH CÂU HỎI</h3>
-                                <button onClick={() => setEditingApp({...editingApp, questions: [...editingApp.questions, {id: editingApp.questions.length + 1, title: '', desc: '', refImage: []}]})} className="text-sm bg-slate-100 px-3 py-2 rounded-lg hover:bg-slate-200 font-bold text-slate-600 border border-slate-300 flex items-center gap-1">
-                                    <Plus size={14}/> Thêm câu hỏi
-                                </button>
-                            </div>
-                            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                                {editingApp.questions.map((q, idx) => (
-                                    <div key={idx} className="border border-slate-200 p-4 rounded-xl bg-slate-50 relative group">
-                                        <button onClick={() => { const newQs = editingApp.questions.filter((_, i) => i !== idx); setEditingApp({...editingApp, questions: newQs}); }} className="absolute top-2 right-2 text-slate-300 hover:text-red-500 p-1"><X size={18}/></button>
-                                        <div className="flex gap-3 mb-2">
-                                            <input type="number" className="w-12 p-2 border rounded-lg text-center font-bold" value={q.id} onChange={(e) => { const newQs = [...editingApp.questions]; newQs[idx].id = parseInt(e.target.value); setEditingApp({...editingApp, questions: newQs}); }}/>
-                                            <input className="flex-1 p-2 border rounded-lg font-bold" placeholder="Tiêu đề câu hỏi" value={q.title} onChange={(e) => { const newQs = [...editingApp.questions]; newQs[idx].title = e.target.value; setEditingApp({...editingApp, questions: newQs}); }}/>
-                                        </div>
-                                        <input className="w-full p-2 border rounded-lg text-sm bg-white mb-3" placeholder="Mô tả..." value={q.desc} onChange={(e) => { const newQs = [...editingApp.questions]; newQs[idx].desc = e.target.value; setEditingApp({...editingApp, questions: newQs}); }}/>
-                                        
-                                        {/* Ảnh minh họa */}
-                                        <div className="flex flex-wrap gap-2 items-center pt-2 border-t border-slate-200">
-                                            {(Array.isArray(q.refImage) ? q.refImage : []).map((imgUrl, i) => (
-                                                <div key={i} className="relative w-12 h-12 rounded border bg-white group/img">
-                                                    <img src={imgUrl} alt="ref" className="w-full h-full object-cover rounded"/>
-                                                    <button onClick={() => { const newQs = [...editingApp.questions]; const currentImgs = newQs[idx].refImage; newQs[idx].refImage = currentImgs.filter(url => url !== imgUrl); setEditingApp({ ...editingApp, questions: newQs }); }} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover/img:opacity-100">×</button>
-                                                </div>
-                                            ))}
-                                            <label className="w-12 h-12 border-2 border-dashed border-slate-300 rounded flex items-center justify-center cursor-pointer hover:bg-blue-50 text-slate-400 hover:text-blue-500">
-                                                <ImageIcon size={16}/><input type="file" className="hidden" accept="image/*" onChange={(e) => handleUploadImage(idx, e)}/>
-                                            </label>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                          {/* --- 4. DANH SÁCH CÂU HỎI (Giữ nguyên logic cũ) --- */}
+                          {/* ... (Đoạn code hiển thị câu hỏi bạn giữ nguyên như cũ, vì câu hỏi dùng id riêng của nó) ... */}
+                          <div className="flex justify-between items-center mb-4">
+                              <h3 className="font-bold text-slate-700">DANH SÁCH CÂU HỎI</h3>
+                              {/* ... Nút thêm câu hỏi ... */}
+                          </div>
+                          {/* ... List câu hỏi ... */}
+
+                      </div>
                     ) : (
                         <div className="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
                             <Settings size={48} className="mb-4 opacity-20"/>
