@@ -275,7 +275,7 @@ const AdminPage = () => {
       <div className="max-w-7xl mx-auto">
         
         {/* THANH MENU TABS */}
-        <div className="flex gap-2 mb-6 border-b border-slate-300 overflow-x-auto">
+        <div className="flex justify-center gap-2 mb-6 border-b border-slate-300 overflow-x-auto">
             <button onClick={() => setActiveTab('links')} className={`px-6 py-3 font-bold rounded-t-xl transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'links' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>
                 <LinkIcon size={18}/> TẠO LINK BÁO CÁO
             </button>
@@ -361,11 +361,11 @@ const AdminPage = () => {
                             
                             {/* Thông tin chung */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                                <div><label className="text-xs font-bold text-slate-500">ID (Folder ảnh)</label><input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" value={editingApp.id} onChange={e => setEditingApp({...editingApp, id: e.target.value})} placeholder="vd: solar_da_nang"/></div>
-                                <div><label className="text-xs font-bold text-slate-500">Tên hiển thị</label><input className="w-full p-2 border rounded-lg mt-1 bg-white" value={editingApp.name} onChange={e => setEditingApp({...editingApp, name: e.target.value})} placeholder="vd: Báo cáo Solar"/></div>
+                                <div><label className="text-xs font-bold text-slate-500">ID </label><input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" value={editingApp.id} onChange={e => setEditingApp({...editingApp, id: e.target.value})} placeholder="vd: solar_da_nang"/></div>
+                                <div><label className="text-xs font-bold text-slate-500">Tên ứng dụng</label><input className="w-full p-2 border rounded-lg mt-1 bg-white" value={editingApp.name} onChange={e => setEditingApp({...editingApp, name: e.target.value})} placeholder="vd: Báo cáo Solar"/></div>
                                 <div><label className="text-xs font-bold text-slate-500">SheetName (Folder báo cáo)</label><input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" value={editingApp.sheetName} onChange={e => setEditingApp({...editingApp, sheetName: e.target.value})} placeholder="vd: SOLAR_DN"/></div>
-                                <div><label className="text-xs font-bold text-slate-500 uppercase">Report Name (Tên file xuất ra)</label><input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" value={editingApp.reportName || ''} onChange={e => setEditingApp({...editingApp, reportName: e.target.value})} placeholder="vd: SolarCheckListEvent"/></div>
-                                <div><label className="text-xs font-bold text-slate-500">Tiêu đề Tab</label><input className="w-full p-2 border rounded-lg mt-1 bg-white" value={editingApp.tabTitle} onChange={e => setEditingApp({...editingApp, tabTitle: e.target.value})} placeholder="vd: Checklist Bảo Trì"/></div>
+                                <div><label className="text-xs font-bold text-slate-500 uppercase">ReportName (Tên file xuất ra)</label><input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" value={editingApp.reportName || ''} onChange={e => setEditingApp({...editingApp, reportName: e.target.value})} placeholder="vd: SolarCheckListEvent"/></div>
+                                <div><label className="text-xs font-bold text-slate-500">Tab Title</label><input className="w-full p-2 border rounded-lg mt-1 bg-white" value={editingApp.tabTitle} onChange={e => setEditingApp({...editingApp, tabTitle: e.target.value})} placeholder="vd: Checklist Bảo Trì"/></div>
                             </div>
 
                             {/* Danh sách câu hỏi */}
