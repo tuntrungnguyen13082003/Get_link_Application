@@ -240,14 +240,13 @@ app.post('/api/save-app', (req, res) => {
 // --- 11. API: XÓA ỨNG DỤNG ---
 app.post('/api/delete-app', (req, res) => {
     try {
-        const { sheetName } = req.body; // 👈 Phải là sheetName
+        const { sheetName } = req.body;
+        if (!fs.existsSync(APPS_PATH)) return res.json({ status: 'error', message: 'Chưa có dữ liệu' });
+        
         let apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
-        
-        // Giữ lại những app KHÁC sheetName cần xóa
         const newApps = apps.filter(a => a.sheetName !== sheetName);
-        
         fs.writeFileSync(APPS_PATH, JSON.stringify(newApps, null, 2));
-        res.json({ status: 'success', message: 'Đã xóa' });
+        res.json({ status: 'success', message: 'Đã xóa ứng dụng!' });
     } catch (e) {
         res.status(500).json({ status: 'error', message: e.message });
     }
