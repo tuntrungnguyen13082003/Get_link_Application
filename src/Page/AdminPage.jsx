@@ -169,14 +169,23 @@ const AdminPage = () => {
   };
 
   const handleDeleteApp = async (id) => {
-    if (!window.confirm(`Xóa ứng dụng ${id}?`)) return;
+    if (!sheetName) return alert("Lỗi: Không tìm thấy Mã ứng dụng để xóa!");
+
+    if (!window.confirm(`CẢNH BÁO: Bạn chắc chắn muốn xóa ứng dụng có mã "${sheetName}"?\n(Dữ liệu báo cáo liên quan trong Kho Dữ Liệu vẫn sẽ được giữ lại)`)) return;
+    
     try {
+      // 👇 Gửi đúng key là 'sheetName' lên server
       await fetch(`${BACKEND_URL}/delete-app`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sheetName: sheetName }) 
       });
-      fetchApps();
-      if (editingApp?.sheetName === id) setEditingApp(null);
+      
+      fetchApps(); // Tải lại danh sách
+      
+      // Nếu đang mở đúng app vừa xóa thì đóng form lại
+      if (editingApp?.sheetName === sheetName) setEditingApp(null);
+      
     } catch (e) { alert("Lỗi xóa app!"); }
   };
 
