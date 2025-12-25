@@ -499,7 +499,7 @@ const AdminPage = () => {
         {activeTab === 'database' && currentUser.role === 'admin' && (
              <div className="max-w-7xl mx-auto">
                  {/* Truyền đúng currentUser.username vào */}
-                 <AdminDashboard currentUser={currentUser.username} />
+                 <AdminDashboard currentUser={currentUser.username} apps={apps} />
              </div>
         )}
 
