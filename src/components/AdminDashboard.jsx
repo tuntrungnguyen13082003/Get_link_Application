@@ -81,11 +81,11 @@ const AdminDashboard = ({ currentUser, apps }) => {
         const PARENT_FOLDER_ID = "1rApCukRbxjEXLSN7zIFW1rmTYZQBoS-9"; 
 
 //      Cách 1: Mở thẳng Folder Tổng (An toàn nhất, nhìn thấy hết các folder con)
-        const folderUrl = `https://drive.google.com/drive/u/0/folders/${PARENT_FOLDER_ID}`;
+        //const folderUrl = `https://drive.google.com/drive/u/0/folders/${PARENT_FOLDER_ID}`;
         
         // Cách 2: (Nâng cao) Mở và tự động Search tên Sheet trong Folder đó
         // Nếu bạn thích nó tự lọc luôn thì dùng dòng dưới này (bỏ comment):
-        // const folderUrl = `https://drive.google.com/drive/u/0/search?q=parent:${PARENT_FOLDER_ID}%20name:${activeSheet}`;
+        const folderUrl = `https://drive.google.com/drive/u/0/search?q=parent:${PARENT_FOLDER_ID}%20name:${activeSheet}`;
 
         window.open(folderUrl, '_blank');
     };
