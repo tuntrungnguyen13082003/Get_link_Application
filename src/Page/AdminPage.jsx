@@ -388,7 +388,7 @@ const AdminPage = () => {
                                   {/* Cột 1: Mã Ứng Dụng (SheetName) */}
                                   <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 h-full">
                                       <label className="text-xs font-bold text-blue-600 uppercase mb-2 block">1. Mã Ứng Dụng (Sheet Name)</label>
-                                      <input className="w-full p-3 border border-blue-200 rounded-xl font-mono text-lg font-bold text-blue-800 bg-white focus:ring-2 focus:ring-blue-500 outline-none" 
+                                      <input disabled={!editingApp.isNew} className="w-full p-3 border border-blue-200 rounded-xl font-mono text-lg font-bold text-blue-800 bg-white focus:ring-2 focus:ring-blue-500 outline-none" 
                                           value={editingApp.sheetName} 
                                           onChange={e => setEditingApp({...editingApp, sheetName: e.target.value})} 
                                           placeholder="VD: SOLAR_DN"
