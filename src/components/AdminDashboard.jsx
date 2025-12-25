@@ -77,8 +77,16 @@ const AdminDashboard = ({ currentUser, apps }) => {
 
     // 6. Hàm Mở Folder Drive (Tìm kiếm theo tên Sheet)
     const openDriveFolder = () => {
-        // Mở tab tìm kiếm folder trên Drive
-        const driveSearchUrl = `https://drive.google.com/drive/u/0/search?q=type:folder%20name:${activeSheet}`;
+        // 👇👇👇 DÁN ID FOLDER TỔNG CỦA BẠN VÀO ĐÂY 👇👇👇
+        const PARENT_FOLDER_ID = "1rApCukRbxjEXLSN7zIFW1rmTYZQBoS-9"; 
+
+        // Câu lệnh tìm kiếm: "Tìm folder có tên là [SheetName] nằm trong cha là [ParentID]"
+        // Cú pháp search của Google Drive: parent:ID name:NAME
+        const query = `parent:${PARENT_FOLDER_ID} name:${activeSheet}`;
+        
+        // Tạo link search
+        const driveSearchUrl = `https://drive.google.com/drive/u/0/search?q=${encodeURIComponent(query)}`;
+        
         window.open(driveSearchUrl, '_blank');
     };
 
