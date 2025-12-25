@@ -263,7 +263,7 @@ const AdminPage = () => {
 
         {/* === TAB 1: TẠO LINK (Giao diện cũ của bạn) === */}
         {activeTab === 'links' && (
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden p-6 max-w-2xl animate-in fade-in">
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden p-10 max-w-4xl mx-auto animate-in fade-in">
                 <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
                     <LinkIcon className="text-blue-600"/> TẠO LIÊN KẾT MỚI
                 </h2>
