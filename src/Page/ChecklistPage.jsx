@@ -11,7 +11,7 @@ const ChecklistPage = () => {
       .then(json => {
         // Chuyển đổi từ Mảng [] sang Object {} để khớp với logic cũ
         const dataObj = {};
-        if (json.data) json.data.forEach(app => dataObj[app.id] = app);
+        if (json.data) json.data.forEach(app => dataObj[app.sheetName] = app);
         setData(dataObj);
       })
       .catch(err => console.error("Lỗi tải data:", err));
