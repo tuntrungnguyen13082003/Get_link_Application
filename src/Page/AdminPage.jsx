@@ -62,8 +62,25 @@ const AdminPage = () => {
   }, []);
 
   const handleLogout = () => {
-    setCurrentUser(null); setUsername(""); setPassword("");
+    // 1. Xóa thông tin User
+    setCurrentUser(null); 
+    setUsername(""); 
+    setPassword("");
     localStorage.removeItem('user_session');
+
+    // 2. XÓA SẠCH DỮ LIỆU CỦA TAB TẠO LINK (Fix lỗi của bạn ở đây)
+    setCode('');                // Xóa mã đã nhập
+    setGeneratedLink('');       // Xóa link đã tạo
+    setSelectedAppId('');       // Reset app đã chọn
+    setIsLoading(false);
+
+    // 3. XÓA SẠCH DỮ LIỆU CỦA TAB KHÁC
+    setEditingApp(null);        // Đóng form sửa ứng dụng
+    setActiveTab('links');      // Quay về tab đầu tiên mặc định
+    
+    // 4. Xóa form nhập liệu cài đặt (nếu có)
+    setNewPassForm({ old: '', new: '' });
+    setNewUserForm({ user: '', pass: '' });
   };
 
   const fetchUserList = async () => {
