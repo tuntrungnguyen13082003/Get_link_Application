@@ -271,6 +271,45 @@ app.post('/api/upload-config-image', uploadConfig.single('image'), (req, res) =>
     }
 });
 
+// --- 1. API: LẤY DỮ LIỆU BÁO CÁO (Cần gửi kèm username admin để bảo mật) ---
+app.post('/api/admin/reports', (req, res) => {
+    try {
+        const { requester } = req.body;
+        // Kiểm tra quyền Admin (Code cũ bạn có rồi, tôi viết tắt đoạn này)
+        const users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf8'));
+        const isAdmin = users.find(u => u.username === requester && u.role === 'admin');
+        
+        if (!isAdmin) return res.status(403).json({ status: 'error', message: 'Cấm truy cập!' });
+
+        if (!fs.existsSync(DB_PATH)) return res.json({ status: 'success', data: [] });
+        const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+        res.json({ status: 'success', data: db });
+    } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
+// --- 2. API: XÓA 1 DÒNG (Theo Token) ---
+app.post('/api/admin/delete-record', (req, res) => {
+    try {
+        const { token } = req.body;
+        let db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+        const newDb = db.filter(item => item.token !== token); // Lọc bỏ dòng cần xóa
+        fs.writeFileSync(DB_PATH, JSON.stringify(newDb, null, 2));
+        res.json({ status: 'success', message: 'Đã xóa 1 dòng!' });
+    } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
+// --- 3. API: XÓA CẢ SHEET (Theo SheetName) ---
+app.post('/api/admin/delete-sheet', (req, res) => {
+    try {
+        const { sheetName } = req.body;
+        let db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+        // Xóa tất cả những dòng có sheetName trùng khớp
+        const newDb = db.filter(item => item.sheetName !== sheetName);
+        fs.writeFileSync(DB_PATH, JSON.stringify(newDb, null, 2));
+        res.json({ status: 'success', message: `Đã xóa sạch dữ liệu của ${sheetName}!` });
+    } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
 app.listen(17004, '0.0.0.0', () => {
     console.log('✅ Backend Server đang chạy tại cổng 17004 (ES Module mode)');
 });

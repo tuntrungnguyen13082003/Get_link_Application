@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, LogOut, UserPlus, Settings, Trash2, Shield, User, Key, Link as LinkIcon, Plus, Save, Image as ImageIcon, X, LayoutGrid } from 'lucide-react';
+// 👇 Thêm 'Database' vào dòng import này
+import { Lock, LogOut, UserPlus, Settings, Trash2, Shield, User, Key, Link as LinkIcon, Plus, Save, Image as ImageIcon, X, LayoutGrid, Database } from 'lucide-react';
+// 👇 Import file dashboard
+import AdminDashboard from '../components/AdminDashboard';
 
 const APP_ICONS = [
     "📝", "📸", "⚠️", "⚡", "🔧", "🧯", "🏭", "🔋", "✅", "🚒", "🏗️", "🔌", "💧", "🚲", "🚗", "🛡️"
@@ -293,6 +296,12 @@ const AdminPage = () => {
                 </button>
             )}
 
+            {currentUser.role === 'admin' && (
+                <button onClick={() => setActiveTab('database')} className={`px-6 py-3 font-bold rounded-t-xl transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'database' ? 'bg-purple-700 text-white shadow-lg' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>
+                    <Database size={18}/> KHO DỮ LIỆU
+                </button>
+            )}
+
             <button onClick={() => setActiveTab('settings')} className={`px-6 py-3 font-bold rounded-t-xl transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'settings' ? 'bg-orange-600 text-white shadow-lg' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>
                 <Settings size={18}/> CÀI ĐẶT & USER
             </button>
@@ -486,7 +495,15 @@ const AdminPage = () => {
             </div>
         )}
 
-        {/* === TAB 3: CÀI ĐẶT & USER (Giao diện cũ của bạn) === */}
+        {/* === TAB 3: KHO DỮ LIỆU (MỚI) === */}
+        {activeTab === 'database' && currentUser.role === 'admin' && (
+             <div className="max-w-7xl mx-auto">
+                 {/* Truyền đúng currentUser.username vào */}
+                 <AdminDashboard currentUser={currentUser.username} />
+             </div>
+        )}
+
+        {/* === TAB 4: CÀI ĐẶT & USER (Giao diện cũ của bạn) === */}
         {activeTab === 'settings' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in">
                  {/* Đổi mật khẩu */}
