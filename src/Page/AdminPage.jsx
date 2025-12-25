@@ -7,8 +7,6 @@ import { Lock, LogOut, UserPlus, Settings, Trash2, Shield, User, Key, Link as Li
 const AdminPage = () => {
   const BACKEND_URL = "http://solar-field.ddns.net:17004/api"; 
   
-  useEffect(() => { document.title = "Admin System"; }, []);
-
   // --- STATE CŨ (GIỮ NGUYÊN) ---
   const [currentUser, setCurrentUser] = useState(null); 
   const [username, setUsername] = useState("");
@@ -55,13 +53,12 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user_session');
-    if (savedUser) {
-        const user = JSON.parse(savedUser);
-        setCurrentUser(user);
-        if (user.role === 'admin') fetchUserList();
-        fetchApps();
-    }
+// 1. Xóa sạch dấu vết cũ
+    localStorage.removeItem('user_session');
+    setCurrentUser(null);
+    
+    // 2. Chỉ giữ lại mỗi cái title
+    document.title = "Admin System";
   }, []);
 
   const handleLogout = () => {
@@ -294,7 +291,7 @@ const AdminPage = () => {
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">NHẬP MÃ HIỂN THỊ</label>
-                        <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder="VD: MAY-A" 
+                        <input type="text" value={code} onChange={(e) => {setCode(e.target.value); setGeneratedLink('');}} onFocus={() => setGeneratedLink('')} placeholder="VD: MAY-A" 
                             className="w-full p-3 border rounded-xl font-bold uppercase outline-none focus:border-blue-500 bg-slate-50" />
                         
                         {!generatedLink && (
