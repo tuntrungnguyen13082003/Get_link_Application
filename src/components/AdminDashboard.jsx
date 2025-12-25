@@ -78,7 +78,7 @@ const AdminDashboard = ({ currentUser, apps }) => {
     // 6. Hàm Mở Folder Drive (Tìm kiếm theo tên Sheet)
     const openDriveFolder = () => {
         // 👇👇👇 DÁN ID FOLDER TỔNG CỦA BẠN VÀO ĐÂY 👇👇👇
-        const query = `type:folder name:${activeSheet}`;
+        const query = `type:folder ${activeSheet}`;
         
         // Tạo link tìm kiếm
         const driveSearchUrl = `https://drive.google.com/drive/u/0/search?q=${encodeURIComponent(query)}`;
