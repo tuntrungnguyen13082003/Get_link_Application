@@ -181,7 +181,24 @@ const AdminPage = () => {
     if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(()=>alert("Đã copy link!")).catch(()=>fallbackCopy(text));
     else fallbackCopy(text);
   };
-  const fallbackCopy = (text) => { /* Giữ nguyên hàm fallback của bạn */ };
+  const fallbackCopy = (text) => {
+     /* Giữ nguyên hàm fallback của bạn */ 
+     var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed"; // Để không cuộn trang
+    ta.style.left = "0";
+    ta.style.top = "0";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand('copy');
+      alert("✅ Đã copy link vào bộ nhớ tạm!");
+    } catch (e) {
+      alert("⚠️ Không thể copy tự động. Hãy copy thủ công nhé.");
+    }
+    document.body.removeChild(ta);
+    };
   
   const handleCreateLink = async () => {
     const currentApp = apps.find(a => a.id === selectedAppId);
