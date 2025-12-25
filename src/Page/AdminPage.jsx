@@ -136,7 +136,7 @@ const AdminPage = () => {
         if (json.status === 'success') {
             setApps(json.data);
             // Auto chọn app đầu tiên cho tab Link
-            if (json.data.length > 0 && !selectedAppId) setSelectedAppId(json.data[0].id);
+            if (json.data.length > 0 && !selectedAppId) setSelectedAppId(json.data[0].sheetName);
         }
     } catch (e) { console.error("Lỗi tải apps"); }
   };
@@ -144,18 +144,16 @@ const AdminPage = () => {
   // Các hàm hỗ trợ Builder
   const handleNewApp = () => {
     setEditingApp({
-      id: '', 
+      sheetName: '', 
       icon: '📝', // <--- QUAN TRỌNG: Thêm dòng này vào đây
-      name: 'Ứng dụng mới', 
-      sheetName: 'NEW_SHEET', 
-      reportName: 'Report_Name', 
+      name: 'Ứng dụng mới',  
       tabTitle: 'New Checklist',
       questions: []
     });
   };
 
   const handleSaveApp = async () => {
-    if (!editingApp.id) return alert("Chưa nhập ID ứng dụng!");
+    if (!editingApp.sheetName) return alert("Chưa nhập Sheet Name!");
     setIsSavingApp(true);
     try {
       const res = await fetch(`${BACKEND_URL}/save-app`, {
@@ -178,17 +176,17 @@ const AdminPage = () => {
         body: JSON.stringify({ id })
       });
       fetchApps();
-      if (editingApp?.id === id) setEditingApp(null);
+      if (editingApp?.sheetName === id) setEditingApp(null);
     } catch (e) { alert("Lỗi xóa app!"); }
   };
 
   const handleUploadImage = async (qIndex, e) => {
     const file = e.target.files[0];
-    if (!file || !editingApp.id) return alert("Chọn file và nhập ID App trước!");
+    if (!file || !editingApp.sheetName) return alert("Chọn file và nhập Sheet Name trước!");
     const formData = new FormData();
     formData.append('image', file);
     try {
-      const res = await fetch(`${BACKEND_URL}/upload-config-image?appId=${editingApp.id}`, { method: 'POST', body: formData });
+      const res = await fetch(`${BACKEND_URL}/upload-config-image?appId=${editingApp.sheetName}`, { method: 'POST', body: formData });
       const json = await res.json();
       if (json.status === 'success') {
         const newQs = [...editingApp.questions];
@@ -224,7 +222,7 @@ const AdminPage = () => {
     };
   
   const handleCreateLink = async () => {
-    const currentApp = apps.find(a => a.id === selectedAppId);
+    const currentApp = apps.find(a => a.sheetName === selectedAppId);
     if (!currentApp || !code.trim()) return alert("Thiếu thông tin!");
     
     setIsLoading(true); setGeneratedLink('');
@@ -232,7 +230,7 @@ const AdminPage = () => {
     // Tạo token ngẫu nhiên
     const t = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
     // Link dùng HashRouter (#)
-    const finalLink = `${window.location.origin}/#/checklist/${currentApp.id}?code=${t}`;
+    const finalLink = `${window.location.origin}/#/checklist/${currentApp.sheetName}?code=${t}`;
     
     try {
       const res = await fetch(`${BACKEND_URL}/create-link`, {
@@ -318,7 +316,7 @@ const AdminPage = () => {
                         <label className="block text-sm font-bold text-slate-700 mb-2">CHỌN ỨNG DỤNG</label>
                         <select className="w-full p-3 border rounded-xl outline-none focus:border-blue-500 bg-slate-50" 
                             onChange={(e) => { setSelectedAppId(e.target.value); setGeneratedLink(''); }} value={selectedAppId}>
-                            {apps.map((app) => (<option key={app.id} value={app.id}> {app.icon} {app.name}</option>))}
+                            {apps.map((app) => (<option key={app.sheetName} value={app.sheetName}> {app.icon} {app.name}</option>))}
                         </select>
                     </div>
                     <div>
@@ -354,15 +352,15 @@ const AdminPage = () => {
                     </button>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                         {apps.map(app => (
-                            <div key={app.id} onClick={() => setEditingApp(app)} 
-                                className={`flex justify-between items-center p-3 rounded-xl cursor-pointer border transition-all ${editingApp?.id === app.id ? 'bg-green-50 border-green-500' : 'bg-slate-50 border-transparent hover:bg-slate-100'}`}>
+                            <div key={app.sheetName} onClick={() => setEditingApp(app)} 
+                                className={`flex justify-between items-center p-3 rounded-xl cursor-pointer border transition-all ${editingApp?.sheetName === app.sheetName ? 'bg-green-50 border-green-500' : 'bg-slate-50 border-transparent hover:bg-slate-100'}`}>
                                 
                                 {/* 👇👇👇 THAY ĐỔI Ở ĐÂY: Thêm {app.icon} vào trước tên 👇👇👇 */}
                                 <span className="font-bold text-slate-700 truncate flex-1">
                                     {app.icon} {app.name}
                                 </span>
                                 
-                                <button onClick={(e) => {e.stopPropagation(); handleDeleteApp(app.id);}} className="text-slate-400 hover:text-red-500 p-1">
+                                <button onClick={(e) => {e.stopPropagation(); handleDeleteApp(app.sheetName);}} className="text-slate-400 hover:text-red-500 p-1">
                                     <Trash2 size={16}/>
                                 </button>
                             </div>
@@ -386,7 +384,7 @@ const AdminPage = () => {
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 uppercase">ID (Folder ảnh)</label>
                                     <input className="w-full p-2 border rounded-lg mt-1 font-mono bg-white" 
-                                        value={editingApp.id} onChange={e => setEditingApp({...editingApp, id: e.target.value})} 
+                                        value={editingApp.sheetName} onChange={e => setEditingApp({...editingApp, id: e.target.value})} 
                                         placeholder="vd: solar_da_nang"/>
                                 </div>
                                 <div>

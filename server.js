@@ -223,7 +223,7 @@ app.post('/api/save-app', (req, res) => {
         }
         
         // Kiểm tra xem ID đã có chưa để update hay push mới
-        const index = apps.findIndex(a => a.id === newApp.id);
+        const index = apps.findIndex(a => a.sheetName === newApp.sheetName);
         if (index !== -1) {
             apps[index] = newApp; // Cập nhật
         } else {
@@ -240,11 +240,11 @@ app.post('/api/save-app', (req, res) => {
 // --- 11. API: XÓA ỨNG DỤNG ---
 app.post('/api/delete-app', (req, res) => {
     try {
-        const { id } = req.body;
+        const { sheetName } = req.body;
         if (!fs.existsSync(APPS_PATH)) return res.json({ status: 'error', message: 'Chưa có dữ liệu' });
         
         let apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
-        const newApps = apps.filter(a => a.id !== id);
+        const newApps = apps.filter(a => a.sheetName !== sheetName);
         fs.writeFileSync(APPS_PATH, JSON.stringify(newApps, null, 2));
         res.json({ status: 'success', message: 'Đã xóa ứng dụng!' });
     } catch (e) {

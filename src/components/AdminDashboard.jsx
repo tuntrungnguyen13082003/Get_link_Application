@@ -68,8 +68,7 @@ const AdminDashboard = ({ currentUser, apps }) => {
     // 5. Hàm Tạo Link Web (Checklist)
     const getWebLink = (row) => {
         // Tìm App ID dựa trên SheetName hiện tại
-        const currentApp = apps.find(a => a.sheetName === activeSheet);
-        const appId = currentApp ? currentApp.id : 'unknown';
+        const appId = row.sheetName;
         
         // Link dạng: domain/#/checklist/APP_ID?code=TOKEN
         return `${window.location.origin}/#/checklist/${appId}?code=${row.token}`;
