@@ -18,6 +18,17 @@ const UPLOADS_DIR = path.join(__dirname, 'uploads');
 
 const USERS_PATH = path.join(__dirname, 'users.json');
 
+const APPS_PATH = path.join(__dirname, 'apps.json');
+const CONFIG_IMAGES_DIR = path.join(__dirname, 'uploads', 'config_images');
+
+// 1. Tạo folder chứa ảnh minh họa (nếu chưa có)
+if (!fs.existsSync(CONFIG_IMAGES_DIR)) {
+    fs.mkdirSync(CONFIG_IMAGES_DIR, { recursive: true });
+}
+
+// 2. QUAN TRỌNG: Mở cổng cho phép Frontend xem ảnh từ folder uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // --- HÀM KHỞI TẠO FILE USER (Tạo mặc định 1 admin nếu chưa có) ---
 if (!fs.existsSync(USERS_PATH)) {
     const defaultUser = [{ username: "admin", password: "admin", role: "admin" }];
@@ -34,42 +45,6 @@ if (!fs.existsSync(DB_PATH)) {
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// --- 1. API: TẠO MÃ MỚI (Admin) ---
-// app.post('/api/create-link', (req, res) => {
-//     // Nhận dữ liệu từ Admin gửi lên (Lưu ý: Admin gửi 'code', 'token', 'sheet_name')
-//     const { code, token, sheet_name } = req.body;
-    
-//     // 1. Đọc database hiện có
-//     const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-
-//     // 2. KIỂM TRA TRÙNG: Tìm xem đã có mã này cho ứng dụng này mà vẫn đang 'active' chưa
-//     const isDuplicate = db.find(item => 
-//         item.realCode === code && 
-//         item.sheetName === sheet_name
-//     );
-
-//     if (isDuplicate) {
-//         // Nếu trùng, trả về lỗi để Admin hiển thị thông báo "Hãy chọn mã mới"
-//         return res.json({ 
-//             status: 'error', 
-//             message: 'Mã này đã tồn tại, vui lòng chọn mã khác!' 
-//         });
-//     }
-
-//     // 3. Nếu không trùng, tiến hành lưu như bình thường
-//     db.push({
-//         realCode: code,
-//         token: token,
-//         sheetName: sheet_name,
-//         status: 'active',
-//         createdAt: new Date().toISOString()
-//     });
-
-//     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    
-//     // Trả về thành công để Admin biết và hiện link
-//     res.json({ status: 'success' });
-// });
 // --- 1. API: TẠO MÃ MỚI (Admin) ---
 // Đã xóa logic kiểm tra trùng theo yêu cầu mới
 app.post('/api/create-link', (req, res) => {
@@ -168,6 +143,104 @@ app.post('/api/upload-report', upload.single('file'), (req, res) => {
 
     } catch (error) {
         console.error("Lỗi upload:", error);
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
+// --- CẤU HÌNH UPLOAD ẢNH MINH HỌA (CHIA FOLDER THEO APP ID) ---
+const configStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        // Lấy appId từ link upload (Ví dụ: /api/upload-config-image?appId=solar)
+        // Nếu không có appId thì cho vào folder 'common' (chung)
+        const appId = req.query.appId || 'common'; 
+        
+        // Tạo đường dẫn: uploads/config_images/solar
+        const appFolder = path.join(CONFIG_IMAGES_DIR, appId);
+
+        // Tự động tạo folder con nếu chưa có
+        if (!fs.existsSync(appFolder)) {
+            fs.mkdirSync(appFolder, { recursive: true });
+        }
+
+        cb(null, appFolder);
+    },
+    filename: (req, file, cb) => {
+        // Giữ nguyên tên file gốc hoặc thêm số để không trùng
+        const ext = path.extname(file.originalname);
+        cb(null, `img_${Date.now()}${ext}`);
+    }
+});
+const uploadConfig = multer({ storage: configStorage });
+
+// --- 9. API: LẤY DANH SÁCH ỨNG DỤNG ---
+app.get('/api/apps', (req, res) => {
+    try {
+        if (!fs.existsSync(APPS_PATH)) {
+             return res.json({ status: 'success', data: [] });
+        }
+        const apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
+        res.json({ status: 'success', data: apps });
+    } catch (e) {
+        // Nếu lỗi đọc file (hoặc file chưa có), trả về mảng rỗng để không bị crash
+        res.json({ status: 'success', data: [] });
+    }
+});
+
+// --- 10. API: LƯU ỨNG DỤNG (Thêm mới / Cập nhật) ---
+app.post('/api/save-app', (req, res) => {
+    try {
+        const newApp = req.body;
+        // Đọc file cũ
+        let apps = [];
+        if (fs.existsSync(APPS_PATH)) {
+            apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
+        }
+        
+        // Kiểm tra xem ID đã có chưa để update hay push mới
+        const index = apps.findIndex(a => a.id === newApp.id);
+        if (index !== -1) {
+            apps[index] = newApp; // Cập nhật
+        } else {
+            apps.push(newApp); // Thêm mới
+        }
+
+        fs.writeFileSync(APPS_PATH, JSON.stringify(apps, null, 2));
+        res.json({ status: 'success', message: 'Đã lưu cấu hình ứng dụng!' });
+    } catch (e) {
+        res.status(500).json({ status: 'error', message: 'Lỗi lưu dữ liệu: ' + e.message });
+    }
+});
+
+// --- 11. API: XÓA ỨNG DỤNG ---
+app.post('/api/delete-app', (req, res) => {
+    try {
+        const { id } = req.body;
+        if (!fs.existsSync(APPS_PATH)) return res.json({ status: 'error', message: 'Chưa có dữ liệu' });
+        
+        let apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
+        const newApps = apps.filter(a => a.id !== id);
+        fs.writeFileSync(APPS_PATH, JSON.stringify(newApps, null, 2));
+        res.json({ status: 'success', message: 'Đã xóa ứng dụng!' });
+    } catch (e) {
+        res.status(500).json({ status: 'error', message: e.message });
+    }
+});
+
+// --- 12. API: UPLOAD ẢNH MINH HỌA (Đã nâng cấp chia folder) ---
+app.post('/api/upload-config-image', uploadConfig.single('image'), (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ status: 'error', message: 'Chưa có file' });
+        
+        // Lấy appId để trả về đường dẫn đúng
+        const appId = req.query.appId || 'common';
+
+        // Trả về đường dẫn đầy đủ để Frontend hiển thị
+        const protocol = req.protocol;
+        const host = req.get('host');
+        const imageUrl = `${protocol}://${host}/uploads/config_images/${appId}/${req.file.filename}`;
+        
+        res.json({ status: 'success', url: imageUrl });
+    } catch (error) {
         res.status(500).json({ status: 'error', message: error.message });
     }
 });

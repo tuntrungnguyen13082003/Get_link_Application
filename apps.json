@@ -1,0 +1,28 @@
+[
+  {
+    "id": "solar",
+    "name": "📸 Báo cáo Solar",
+    "sheetName": "SOLAR",
+    "reportName": "SolarCheckListEvent",
+    "tabTitle": "Solar Checklist",
+    "questions": [
+      { "id": 1, "title": "Ảnh tổng quan Inverter, Tủ AC Solar", "desc": "Có bị chất đồ dễ gây cháy không?", "refImage": [] },
+      { "id": 2, "title": "Ảnh các đầu MC4 ở tủ AC", "desc": "Có bị biến dạng không? (Chảy nhựa,...)", "refImage": [] },
+      { "id": 3, "title": "Ảnh các đầu MC4 ở Inverter", "desc": "Có bị biến dạng không? (chảy nhựa,...)", "refImage": [] },
+      { "id": 4, "title": "Ảnh mở cửa tủ AC Solar", "desc": "Chụp ảnh trong tủ AC Solar", "refImage": [] },
+      { "id": 5, "title": "Ảnh đấu nối Solar và tủ MSB Cửa hàng", "desc": "Phần đấu nối có khả năng phát nhiệt không?", "refImage": [] }
+    ]
+  },
+  {
+    "id": "su_co",
+    "name": "⚠️ Báo cáo Sự Cố",
+    "sheetName": "SU_CO",
+    "reportName": "Process_Problem",
+    "tabTitle": "Problem Checklist",
+    "questions": [
+      { "id": 1, "title": "Ảnh tổng quan Inverter, Tủ AC Solar", "desc": "Có bị chất đồ dễ gây cháy không?", "refImage": [] },
+      { "id": 2, "title": "Ảnh các đầu MC4 ở tủ AC", "desc": "Có bị biến dạng không? (Chảy nhựa,...)", "refImage": [] },
+      { "id": 3, "title": "Ảnh các đầu MC4 ở Inverter", "desc": "Có bị biến dạng không? (chảy nhựa,...)", "refImage": [] }
+    ]
+  }
+]

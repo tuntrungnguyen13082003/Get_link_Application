@@ -1,63 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ChecklistRouter from '../components/ChecklistRouter';
-// Import ảnh 
-// Solar
-import anhminhhoa1_solar from '../assets/Solar/Ref_1.jpg';
-import anhminhhoa2_solar from '../assets/Solar/Ref_2.jpg';
-import anhminhhoa3_solar from '../assets/Solar/Ref_3.jpg';
-import anhminhhoa4_solar from '../assets/Solar/Ref_4.jpg';
-import anhminhhoa5_solar from '../assets/Solar/Ref_5.jpg';
-// Sự cố 
-import anhminhhoa1_suco from '../assets/Su_co/Ref_1.jpg';
-import anhminhhoa2_suco from '../assets/Su_co/Ref_2.jpg';
-import anhminhhoa3_suco from '../assets/Su_co/Ref_3.jpg';
 
-// --- PHẦN 1: KHO DỮ LIỆU (CONFIG) ---
-// Gom hết cấu hình Solar, Sự Cố vào đây
-// Lưu ý: Export nó ra để AdminPage còn lấy được tên và link
-export const APP_DATA = {
-  
-  // 1. Cấu hình SOLAR
-  solar: {
-    id: 'solar', // ID này phải trùng với key của object
-    name: '📸 Báo cáo Solar',
-    sheetName: 'SOLAR', 
-    reportName: 'SolarCheckListEvent',
-    tabTitle: 'Solar Checklist',
-    questions: [
-       { id: 1, title: "Ảnh tổng quan Inverter, Tủ AC Solar", desc: "Có bị chất đồ dễ gây cháy không?", refImage: [anhminhhoa1_solar, anhminhhoa2_solar] },
-       { id: 2, title: "Ảnh các đầu MC4 ở tủ AC", desc: "Có bị biến dạng không? (Chảy nhựa,...)", refImage: [anhminhhoa2_solar] },
-       { id: 3, title: "Ảnh các đầu MC4 ở Inverter", desc: "Có bị biến dạng không? (chảy nhựa,...)", refImage: [anhminhhoa3_solar] },
-       { id: 4, title: "Ảnh mở cửa tủ AC Solar", desc: "Chụp ảnh trong tủ AC Solar", refImage: [anhminhhoa4_solar] },
-       { id: 5, title: "Ảnh đấu nối Solar và tủ MSB Cửa hàng", desc: "Phần đấu nối có khả năng phát nhiệt không?", refImage: [anhminhhoa5_solar] },
-    ]
-  },
-
-  // 2. Cấu hình SỰ CỐ
-  su_co: {
-    id: 'su_co',
-    name: '⚠️ Báo cáo Sự Cố',
-    sheetName: 'SU_CO',
-    reportName: 'Process_Problem',
-    tabTitle: 'Problem  Checklist',
-    questions: [
-       { id: 1, title: "Ảnh tổng quan Inverter, Tủ AC Solar", desc: "Có bị chất đồ dễ gây cháy không?", refImage: anhminhhoa1_suco },
-       { id: 2, title: "Ảnh các đầu MC4 ở tủ AC", desc: "Có bị biến dạng không? (Chảy nhựa,...)", refImage: anhminhhoa2_suco },
-       { id: 3, title: "Ảnh các đầu MC4 ở Inverter", desc: "Có bị biến dạng không? (chảy nhựa,...)", refImage: anhminhhoa3_suco },
-    ]
-  },
-
-  // 3.Thêm Ứng dụng: Copy paste vào đây.
-};
-
-
-
-
-
-// --- PHẦN 2: COMPONENT CHECKLISTPAGE ---
 const ChecklistPage = () => {
-  // Chỉ cần ném cục dữ liệu vào cho máy xử lý là xong
-  return <ChecklistRouter data={APP_DATA} />;
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    // Gọi API lấy danh sách ứng dụng
+    fetch("http://solar-field.ddns.net:17004/api/apps")
+      .then(res => res.json())
+      .then(json => {
+        // Chuyển đổi từ Mảng [] sang Object {} để khớp với logic cũ
+        const dataObj = {};
+        if (json.data) json.data.forEach(app => dataObj[app.id] = app);
+        setData(dataObj);
+      })
+      .catch(err => console.error("Lỗi tải data:", err));
+  }, []);
+
+  // Nếu chưa tải xong thì hiện màn hình trắng hoặc chữ Loading
+  if (!data) return <div className="p-10 text-center">⏳ Đang tải cấu hình...</div>;
+
+  // Tải xong thì ném vào Router như cũ
+  return <ChecklistRouter data={data} />;
 };
 
 export default ChecklistPage;
