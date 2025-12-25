@@ -263,18 +263,18 @@ const AdminPage = () => {
         {/* THANH MENU TABS */}
         <div className="flex gap-2 mb-6 border-b border-slate-300 overflow-x-auto">
             <button onClick={() => setActiveTab('links')} className={`px-6 py-3 font-bold rounded-t-xl transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'links' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>
-                <LinkIcon size={18}/> 1. TẠO LINK BÁO CÁO
+                <LinkIcon size={18}/> TẠO LINK BÁO CÁO
             </button>
             
             {/* Tab Tạo Ứng Dụng (Chỉ Admin thấy) */}
             {currentUser.role === 'admin' && (
                 <button onClick={() => setActiveTab('builder')} className={`px-6 py-3 font-bold rounded-t-xl transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'builder' ? 'bg-green-600 text-white shadow-lg' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>
-                    <LayoutGrid size={18}/> 2. TẠO ỨNG DỤNG
+                    <LayoutGrid size={18}/> TẠO ỨNG DỤNG
                 </button>
             )}
 
             <button onClick={() => setActiveTab('settings')} className={`px-6 py-3 font-bold rounded-t-xl transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'settings' ? 'bg-orange-600 text-white shadow-lg' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>
-                <Settings size={18}/> 3. CÀI ĐẶT & USER
+                <Settings size={18}/> CÀI ĐẶT & USER
             </button>
         </div>
 
