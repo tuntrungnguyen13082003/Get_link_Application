@@ -4,6 +4,7 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import axios from 'axios';
 
 const app = express();
 app.use(cors());
@@ -20,6 +21,8 @@ const USERS_PATH = path.join(__dirname, 'users.json');
 
 const APPS_PATH = path.join(__dirname, 'apps.json');
 const CONFIG_IMAGES_DIR = path.join(__dirname, 'uploads', 'config_images');
+
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxx/exec";
 
 // 1. Tạo folder chứa ảnh minh họa (nếu chưa có)
 if (!fs.existsSync(CONFIG_IMAGES_DIR)) {
@@ -104,46 +107,69 @@ app.post('/api/check-status', (req, res) => {
     }
 });
 
-// --- 3. API: NHẬN BÁO CÁO & KHÓA MÃ ---
-app.post('/api/upload-report', upload.single('file'), (req, res) => {
+// --- 3. MỚI: API UPLOAD BÁO CÁO LÊN DRIVE ---
+app.post('/api/upload-report', upload.single('file'), async (req, res) => { // <--- Thêm chữ 'async'
     try {
         const { token } = req.body;
         
-        // 1. Đọc database tìm sheetName dựa vào token
+        // 1. Kiểm tra Token trong Database
         const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
         const entry = db.find(item => item.token === token);
 
         if (!entry) {
             return res.status(400).json({ status: 'error', message: 'Token không hợp lệ' });
         }
-
-        // 2. Xác định thư mục đích theo sheetName (Ví dụ: SOLAR)
-        const sheetFolder = entry.sheetName; 
-        const targetDir = path.join(UPLOADS_DIR, sheetFolder);
-
-        // 3. Tự động tạo thư mục nếu chưa có
-        if (!fs.existsSync(targetDir)) {
-            fs.mkdirSync(targetDir, { recursive: true });
+        
+        if (!req.file) {
+             return res.status(400).json({ status: 'error', message: 'Chưa chọn file báo cáo' });
         }
 
-        // 4. Ghi file từ bộ nhớ vào thư mục đích
-        const filePath = path.join(targetDir, req.file.originalname);
-        fs.writeFileSync(filePath, req.file.buffer);
+        // 2. Lấy tên Folder từ SheetName (Nếu không có thì đặt tên tạm)
+        const folderName = entry.sheetName || "Unknown_App"; 
 
-        // 5. Cập nhật trạng thái 'used' như cũ
-        const index = db.findIndex(item => item.token === token);
-        if (index !== -1) {
-            db[index].status = 'used';
-            db[index].updatedAt = new Date().toISOString();
-            fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+        console.log(`🚀 Đang gửi file sang Drive vào folder: ${folderName}...`);
+
+        // 3. Chuẩn bị gói dữ liệu gửi sang Apps Script
+        const payload = {
+            fileName: req.file.originalname,
+            fileData: req.file.buffer.toString('base64'), // Mã hóa file thành chuỗi
+            folderName: folderName // Gửi kèm tên folder muốn lưu
+        };
+
+        // 4. Bắn sang Google bằng Axios
+        const response = await axios.post(APPS_SCRIPT_URL, payload, {
+            maxRedirects: 5 // Cấu hình để không bị lỗi khi Google chuyển hướng
+        });
+
+        // 5. Xử lý kết quả trả về
+        if (response.data.status === 'success') {
+            console.log(`✅ Thành công! Link file: ${response.data.link}`);
+
+            // Cập nhật trạng thái trong Database
+            const index = db.findIndex(item => item.token === token);
+            if (index !== -1) {
+                db[index].status = 'used';
+                db[index].updatedAt = new Date().toISOString();
+                db[index].driveLink = response.data.link; // Lưu cái Link Drive này lại
+                
+                fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+            }
+
+            // Trả kết quả về cho Web/App
+            res.json({ 
+                status: 'success', 
+                message: 'Đã lưu lên Google Drive thành công',
+                link: response.data.link 
+            });
+
+        } else {
+            // Trường hợp bên Google báo lỗi
+            throw new Error(response.data.message || "Lỗi không xác định từ Google");
         }
-
-        console.log(`✅ Đã lưu báo cáo vào: ${targetDir}`);
-        res.json({ status: 'success', message: 'Báo cáo đã lưu thành công' });
 
     } catch (error) {
-        console.error("Lỗi upload:", error);
-        res.status(500).json({ status: 'error', message: error.message });
+        console.error("Lỗi upload:", error.message);
+        res.status(500).json({ status: 'error', message: "Lỗi Server: " + error.message });
     }
 });
 
