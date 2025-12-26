@@ -77,7 +77,7 @@ const AdminDashboard = ({ currentUser, apps }) => {
     // 6. Hàm Mở Folder Drive (Tìm kiếm theo tên Sheet)
     const openDriveFolder = () => {
         // 👇 THAY bằng chuỗi ký tự ID thực tế trên thanh địa chỉ Google Drive
-        const FOLDER_ID = '1M_oeHGLf8WOrb7go2m1GnuRwYqFd1q6j'; 
+        const FOLDER_ID = '1rApCukRbxjEXLSN7zIFW1rmTYZQBoS-9';
         
         const driveUrl = `https://drive.google.com/drive/u/0/folders/${FOLDER_ID}`;
         

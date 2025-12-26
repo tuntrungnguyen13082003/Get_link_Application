@@ -10,7 +10,7 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
   const [sessionStatus, setSessionStatus] = useState("checking"); 
   const [realCode, setRealCode] = useState(""); 
 
-  // THAY ĐỔI: Trỏ về cổng  thay vì Google
+  // THAY ĐỔI: Trỏ về cổng 3001 của Server thay vì Google
   const BACKEND_URL = import.meta.env.VITE_API_URL; 
 
 const urlParts = window.location.href.split('code=');
@@ -40,7 +40,6 @@ const checkTokenStatus = async () => {
             // Trường hợp 1: Mọi thứ OK (Khớp Token, Khớp App, Status là Active)
             setSessionStatus("active");
             setRealCode(data.realCode);
-            document.title = reportName;
         } else if (data.result === 'used') {
             // Trường hợp 2: Khớp Token, Khớp App nhưng Status là Used
             setSessionStatus("used");
@@ -56,7 +55,7 @@ const checkTokenStatus = async () => {
     }
 };
     checkTokenStatus();
-  }, [fakeTokenFromUrl, sheetName, reportName]);
+  }, [fakeTokenFromUrl, sheetName]);
 
   const handleImageCapture = (e, questionId) => {
     const file = e.target.files[0];

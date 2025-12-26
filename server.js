@@ -26,7 +26,7 @@ const APPS_PATH = path.join(__dirname, 'data', 'apps.json');
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 const CONFIG_IMAGES_DIR = path.join(__dirname, 'uploads', 'config_images');
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOj6rUA2dTWu2AR95YyaRCaygGHcMGIKBXH-ED6SpVAMkclKvJbHOHW3bfhjMnvtPX0g/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyICx-t7Q7JdaBu1puFflC5ILZEsYbHB6eEfnz0ToCFoi-jEw8nNRDTC_hS7rGkREYsA/exec";
 
 // 1. Tạo folder chứa ảnh minh họa (nếu chưa có)
 if (!fs.existsSync(CONFIG_IMAGES_DIR)) {
@@ -435,3 +435,6 @@ app.post('/api/delete-user', (req, res) => {
     res.json({ status: 'success', message: 'Đã xóa tài khoản thành công!' });
 
 });
+
+
+
