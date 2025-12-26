@@ -3,7 +3,7 @@ import { Trash2, FileText, ExternalLink, ShieldAlert, FolderOpen, Copy, Check } 
 
 const AdminDashboard = ({ currentUser, apps }) => {
     // 👇 Sửa đúng IP/Port Server của bạn
-    const API_URL = "http://solar-field.ddns.net:17004/api"; 
+    const API_URL = import.meta.env.VITE_API_URL; 
     
     const [groupedData, setGroupedData] = useState({});
     const [activeSheet, setActiveSheet] = useState('');

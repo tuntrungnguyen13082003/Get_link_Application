@@ -9,7 +9,7 @@ const APP_ICONS = [
 ];
 
 const AdminPage = () => {
-  const BACKEND_URL = "http://solar-field.ddns.net:17004/api"; 
+  const BACKEND_URL = import.meta.env.VITE_API_URL; 
   
   // --- STATE CŨ (GIỮ NGUYÊN) ---
   const [currentUser, setCurrentUser] = useState(null); 

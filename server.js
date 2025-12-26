@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import axios from 'axios';
+import dotenv from 'dotenv';
 
 const app = express();
 app.use(cors());
@@ -14,7 +15,9 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 👇 SỬA Ở ĐÂY: Thêm 'data' vào đường dẫn
+dotenv.config({ path: path.join(__dirname, 'data', '.env') });
+
+// Thêm 'data' vào đường dẫn
 const DB_PATH = path.join(__dirname, 'data', 'database.json');
 const USERS_PATH = path.join(__dirname, 'data', 'users.json');
 const APPS_PATH = path.join(__dirname, 'data', 'apps.json');
@@ -311,8 +314,10 @@ app.post('/api/admin/delete-sheet', (req, res) => {
     } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.listen(17004, '0.0.0.0', () => {
-    console.log('✅ Backend Server đang chạy tại cổng 17004 (ES Module mode)');
+const PORT = process.env.PORT;
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Backend Server đang chạy tại cổng ${PORT} (ES Module mode)`);
 });
 
 // --- 4. API: ĐĂNG NHẬP ---

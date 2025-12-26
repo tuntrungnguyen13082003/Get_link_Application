@@ -3,10 +3,10 @@ import ChecklistRouter from '../components/ChecklistRouter';
 
 const ChecklistPage = () => {
   const [data, setData] = useState(null);
-
+  const BACKEND_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     // Gọi API lấy danh sách ứng dụng
-    fetch("http://solar-field.ddns.net:17004/api/apps")
+    fetch(`${BACKEND_URL}/apps`)
       .then(res => res.json())
       .then(json => {
         // Chuyển đổi từ Mảng [] sang Object {} để khớp với logic cũ
