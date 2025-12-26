@@ -76,13 +76,12 @@ const AdminDashboard = ({ currentUser, apps }) => {
 
     // 6. Hàm Mở Folder Drive (Tìm kiếm theo tên Sheet)
     const openDriveFolder = () => {
-        // 👇👇👇 DÁN ID FOLDER TỔNG CỦA BẠN VÀO ĐÂY 👇👇👇
-        const query = `type:folder ${activeSheet}`;
+        // 👇 THAY bằng chuỗi ký tự ID thực tế trên thanh địa chỉ Google Drive
+        const FOLDER_ID = '1M_oeHGLf8WOrb7go2m1GnuRwYqFd1q6j'; 
         
-        // Tạo link tìm kiếm
-        const driveSearchUrl = `https://drive.google.com/drive/u/0/search?q=${encodeURIComponent(query)}`;
+        const driveUrl = `https://drive.google.com/drive/u/0/folders/${FOLDER_ID}`;
         
-        window.open(driveSearchUrl, '_blank');
+        window.open(driveUrl, '_blank');
     };
 
     // 7. Copy Link
@@ -212,5 +211,6 @@ const AdminDashboard = ({ currentUser, apps }) => {
         </div>
     );
 };
+
 
 export default AdminDashboard;
