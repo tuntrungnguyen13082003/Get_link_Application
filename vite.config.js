@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
     server: {
       host: '0.0.0.0',
       // 4. Lấy cổng từ biến môi trường, nhớ ép kiểu sang số (parseInt)
-      // Nếu không tìm thấy thì mặc định chạy 17003
+
       port: parseInt(env.FRONTEND_PORT),
       allowedHosts: true
     }

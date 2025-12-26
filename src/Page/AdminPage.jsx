@@ -22,6 +22,7 @@ const AdminPage = () => {
   const [generatedLink, setGeneratedLink] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const [originalSheetName, setOriginalSheetName] = useState(null);
   // State Quản trị User
   const [newPassForm, setNewPassForm] = useState({ old: '', new: '' });
   const [newUserForm, setNewUserForm] = useState({ user: '', pass: '' });
@@ -143,13 +144,18 @@ const AdminPage = () => {
 
   // Các hàm hỗ trợ Builder
   const handleNewApp = () => {
+    setOriginalSheetName(null); // 👈 THÊM DÒNG NÀY (Reset biến nhớ)
     setEditingApp({
-      sheetName: '', 
-      icon: '📝', // <--- QUAN TRỌNG: Thêm dòng này vào đây
-      name: 'Ứng dụng mới',  
-      tabTitle: 'New Checklist',
-      questions: []
+        sheetName: '', 
+        icon: '📝', 
+        name: 'Ứng dụng mới',  
+        tabTitle: 'New Checklist',
+        questions: []
     });
+  };
+  const handleEditAppClick = (app) => {
+    setOriginalSheetName(app.sheetName); // Lưu lại tên cũ trước khi sửa
+    setEditingApp(app);
   };
 
   const handleSaveApp = async () => {
@@ -158,10 +164,14 @@ const AdminPage = () => {
     try {
       const res = await fetch(`${BACKEND_URL}/save-app`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingApp)
+        body: JSON.stringify({
+            ...editingApp,
+            oldSheetName: originalSheetName // 👈 QUAN TRỌNG: Thêm dòng này
+        })
       });
       if ((await res.json()).status === 'success') {
         alert("✅ Đã lưu thành công!");
+        setOriginalSheetName(null); // 👈 Thêm dòng này để reset
         fetchApps();
       }
     } catch (e) { alert("Lỗi lưu dữ liệu!"); } 
@@ -358,7 +368,7 @@ const AdminPage = () => {
                     </button>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                         {apps.map(app => (
-                            <div key={app.sheetName} onClick={() => setEditingApp(app)} 
+                            <div key={app.sheetName} onClick={() => handleEditAppClick(app)} 
                                 className={`flex justify-between items-center p-3 rounded-xl cursor-pointer border transition-all ${editingApp?.sheetName === app.sheetName ? 'bg-green-50 border-green-500' : 'bg-slate-50 border-transparent hover:bg-slate-100'}`}>
                                 
                                 {/* 👇👇👇 THAY ĐỔI Ở ĐÂY: Thêm {app.icon} vào trước tên 👇👇👇 */}
@@ -388,69 +398,31 @@ const AdminPage = () => {
                                 </button>
                             </div>
                             
-                            {/* --- DÒNG 1: MÃ ỨNG DỤNG & TIÊU ĐỀ TAB (NẰM CHUNG 1 HÀNG) --- */}
+                            {/* --- DÒNG 1: CẤU HÌNH CƠ BẢN (FOLDER & TÊN APP) --- */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 
-                                {/* Cột 1: Mã Ứng Dụng (SheetName) */}
-                                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 h-full">
-                                    <label className="text-xs font-bold text-blue-600 uppercase mb-2 block">1. Mã Ứng Dụng (Sheet Name)</label>
-                                    <input className="w-full p-3 border border-blue-200 rounded-xl font-mono text-lg font-bold text-blue-800 bg-white focus:ring-2 focus:ring-blue-500 outline-none" 
+                                {/* Cột 1: Tên Folder */}
+                                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 h-full shadow-sm">
+                                    <label className="text-xs font-bold text-blue-600 uppercase mb-2 block">1. Tên Folder (Mã hệ thống)</label>
+                                    <input 
+                                        className="w-full p-3 border border-blue-200 rounded-xl font-mono text-lg font-bold text-blue-800 bg-white focus:ring-2 focus:ring-blue-500 outline-none" 
                                         value={editingApp.sheetName} 
                                         onChange={e => setEditingApp({...editingApp, sheetName: e.target.value})} 
                                         placeholder="VD: SOLAR_DN"
                                     />
-                                    <p className="text-[11px] text-blue-400 mt-2 flex items-center gap-1">
-                                        <Shield size={12}/> Định danh Folder ảnh & Sheet báo cáo.
-                                    </p>
+                                    <p className="text-[11px] text-blue-400 mt-2 flex items-center gap-1"><Shield size={12}/> Định danh Folder ảnh & Sheet báo cáo.</p>
                                 </div>
 
-                                {/* Cột 2: Tiêu đề Tab Trình duyệt */}
-                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 h-full">
-                                    <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">2. Tiêu đề Tab Trình duyệt</label>
-                                    <input className="w-full p-3 border border-slate-300 rounded-xl font-bold text-slate-700 focus:border-blue-500 outline-none" 
-                                        value={editingApp.tabTitle} 
-                                        onChange={e => setEditingApp({...editingApp, tabTitle: e.target.value})} 
-                                        placeholder="VD: Checklist Bảo Trì"
+                                {/* Cột 2: Tên App */}
+                                <div className="bg-white p-4 rounded-xl border border-slate-200 h-full shadow-sm">
+                                    <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">2. Tên Ứng Dụng</label>
+                                    <input 
+                                        className="w-full p-3 border border-slate-300 rounded-xl font-bold text-lg text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none placeholder:font-normal" 
+                                        value={editingApp.name} 
+                                        onChange={e => setEditingApp({ ...editingApp, name: e.target.value, tabTitle: e.target.value })} 
+                                        placeholder="VD: Checklist Bảo Trì Solar"
                                     />
-                                    <p className="text-[11px] text-slate-400 mt-2">
-                                        Tên hiển thị trên thanh tab của Chrome/Safari.
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* --- DÒNG 2: GIAO DIỆN HIỂN THỊ (ICON & TÊN APP) --- */}
-                            <div className="mb-6 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                                <label className="text-xs font-bold text-slate-500 uppercase mb-3 block">3. Giao diện hiển thị (Icon & Tên App)</label>
-                                <div className="flex flex-col md:flex-row gap-4 items-center">
-                                    
-                                    {/* Chọn Icon */}
-                                    <div className="w-full md:w-auto">
-                                        <div className="grid grid-cols-8 md:grid-cols-4 gap-2">
-                                            {APP_ICONS.map((ico) => (
-                                                <button 
-                                                    key={ico}
-                                                    onClick={() => setEditingApp({...editingApp, icon: ico})}
-                                                    className={`w-12 h-12 flex items-center justify-center text-2xl rounded-xl border transition-all ${
-                                                        editingApp.icon === ico 
-                                                        ? 'bg-blue-50 border-blue-500 shadow-md scale-110 ring-2 ring-blue-100' 
-                                                        : 'bg-white border-slate-200 hover:bg-slate-50'
-                                                    }`}
-                                                >
-                                                    {ico}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Nhập Tên App */}
-                                    <div className="flex-1 w-full">
-                                        <input 
-                                            className="w-full p-3 border rounded-xl font-bold text-xl text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none placeholder:font-normal" 
-                                            value={editingApp.name} 
-                                            onChange={e => setEditingApp({...editingApp, name: e.target.value})} 
-                                            placeholder="Nhập tên ứng dụng hiển thị..."
-                                        />
-                                    </div>
+                                    <p className="text-[11px] text-slate-400 mt-2">Tên này sẽ hiển thị trên giao diện chính.</p>
                                 </div>
                             </div>
 
@@ -519,10 +491,9 @@ const AdminPage = () => {
 
         {/* === TAB 3: KHO DỮ LIỆU (MỚI) === */}
         {activeTab === 'database' && currentUser.role === 'admin' && (
-             <div className="max-w-7xl mx-auto">
-                 {/* Truyền đúng currentUser.username vào */}
-                 <AdminDashboard currentUser={currentUser.username} apps={apps} />
-             </div>
+            <div className="max-w-7xl mx-auto animate-in fade-in">
+                <AdminDashboard currentUser={currentUser.username} apps={apps} />
+            </div>
         )}
 
         {/* === TAB 4: CÀI ĐẶT & USER (Giao diện cũ của bạn) === */}

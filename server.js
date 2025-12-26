@@ -217,21 +217,57 @@ app.get('/api/apps', (req, res) => {
 });
 
 // --- 10. API: LƯU ỨNG DỤNG (Thêm mới / Cập nhật) ---
+// app.post('/api/save-app', (req, res) => {
+//     try {
+//         const newApp = req.body;
+//         // Đọc file cũ
+//         let apps = [];
+//         if (fs.existsSync(APPS_PATH)) {
+//             apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
+//         }
+        
+//         // Kiểm tra xem ID đã có chưa để update hay push mới
+//         const index = apps.findIndex(a => a.sheetName === newApp.sheetName);
+//         if (index !== -1) {
+//             apps[index] = newApp; // Cập nhật
+//         } else {
+//             apps.push(newApp); // Thêm mới
+//         }
+
+//         fs.writeFileSync(APPS_PATH, JSON.stringify(apps, null, 2));
+//         res.json({ status: 'success', message: 'Đã lưu cấu hình ứng dụng!' });
+//     } catch (e) {
+//         res.status(500).json({ status: 'error', message: 'Lỗi lưu dữ liệu: ' + e.message });
+//     }
+// });
 app.post('/api/save-app', (req, res) => {
     try {
-        const newApp = req.body;
-        // Đọc file cũ
+        // Nhận thêm biến oldSheetName từ Frontend gửi lên
+        const { oldSheetName, ...newApp } = req.body;
+        
         let apps = [];
         if (fs.existsSync(APPS_PATH)) {
             apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
         }
         
-        // Kiểm tra xem ID đã có chưa để update hay push mới
-        const index = apps.findIndex(a => a.sheetName === newApp.sheetName);
-        if (index !== -1) {
-            apps[index] = newApp; // Cập nhật
+        let index = -1;
+
+        // LOGIC TÌM VỊ TRÍ CẦN SỬA:
+        if (oldSheetName) {
+            // Trường hợp 1: Đang sửa (User gửi lên tên cũ) -> Tìm theo tên cũ
+            index = apps.findIndex(a => a.sheetName === oldSheetName);
         } else {
-            apps.push(newApp); // Thêm mới
+            // Trường hợp 2: Tạo mới hoặc logic cũ -> Tìm theo tên mới
+            index = apps.findIndex(a => a.sheetName === newApp.sheetName);
+        }
+
+        if (index !== -1) {
+            // --- CẬP NHẬT ---
+            // Giữ lại các thông tin cũ không bị sửa (nếu cần), ghi đè thông tin mới
+            apps[index] = { ...apps[index], ...newApp };
+        } else {
+            // --- THÊM MỚI ---
+            apps.push(newApp);
         }
 
         fs.writeFileSync(APPS_PATH, JSON.stringify(apps, null, 2));
