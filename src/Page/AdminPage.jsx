@@ -237,7 +237,12 @@ const AdminPage = () => {
   
   const handleCreateLink = async () => {
     const currentApp = apps.find(a => a.sheetName === selectedAppId);
-    if (!currentApp || !code.trim()) return alert("Thiếu thông tin!");
+    if (!selectedAppId || !currentApp) {
+        return alert("Lỗi: Bạn chưa chọn Ứng dụng!");
+    }
+    if (!code || !code.trim()) {
+        return alert("Lỗi: Bạn chưa nhập Mã hiển thị (VD: MAY-A)!");
+    }
     
     setIsLoading(true); setGeneratedLink('');
     const rawCode = code.trim().toUpperCase(); 
@@ -328,8 +333,9 @@ const AdminPage = () => {
                 <div className="space-y-6">
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">CHỌN ỨNG DỤNG</label>
-                        <select className="w-full p-3 border rounded-xl outline-none focus:border-blue-500 bg-slate-50" 
-                            onChange={(e) => { setSelectedAppId(e.target.value); setGeneratedLink(''); }} value={selectedAppId}>
+                        <select className="w-full p-3 border rounded-xl outline-none focus:border-blue-500 bg-slate-50" value={selectedAppId}
+                            onChange={(e) => { setSelectedAppId(e.target.value); setGeneratedLink(''); }}>
+                                <option value="">-- Chọn ứng dụng --</option>
                             {apps.map((app) => (<option key={app.sheetName} value={app.sheetName}> {app.name}</option>))}
                         </select>
                     </div>
