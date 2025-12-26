@@ -14,12 +14,13 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DB_PATH = path.join(__dirname, 'database.json');
+// 👇 SỬA Ở ĐÂY: Thêm 'data' vào đường dẫn
+const DB_PATH = path.join(__dirname, 'data', 'database.json');
+const USERS_PATH = path.join(__dirname, 'data', 'users.json');
+const APPS_PATH = path.join(__dirname, 'data', 'apps.json');
+
+// 👇 GIỮ NGUYÊN: Các folder ảnh vẫn ở vị trí cũ
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
-
-const USERS_PATH = path.join(__dirname, 'users.json');
-
-const APPS_PATH = path.join(__dirname, 'apps.json');
 const CONFIG_IMAGES_DIR = path.join(__dirname, 'uploads', 'config_images');
 
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyICx-t7Q7JdaBu1puFflC5ILZEsYbHB6eEfnz0ToCFoi-jEw8nNRDTC_hS7rGkREYsA/exec";
