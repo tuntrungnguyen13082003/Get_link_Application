@@ -147,9 +147,7 @@ const AdminPage = () => {
     setOriginalSheetName(null); // 👈 THÊM DÒNG NÀY (Reset biến nhớ)
     setEditingApp({
         sheetName: '', 
-        icon: '📝', 
         name: 'Ứng dụng mới',  
-        tabTitle: 'New Checklist',
         questions: []
     });
   };
@@ -332,7 +330,7 @@ const AdminPage = () => {
                         <label className="block text-sm font-bold text-slate-700 mb-2">CHỌN ỨNG DỤNG</label>
                         <select className="w-full p-3 border rounded-xl outline-none focus:border-blue-500 bg-slate-50" 
                             onChange={(e) => { setSelectedAppId(e.target.value); setGeneratedLink(''); }} value={selectedAppId}>
-                            {apps.map((app) => (<option key={app.sheetName} value={app.sheetName}> {app.icon} {app.name}</option>))}
+                            {apps.map((app) => (<option key={app.sheetName} value={app.sheetName}> {app.name}</option>))}
                         </select>
                     </div>
                     <div>
@@ -373,7 +371,7 @@ const AdminPage = () => {
                                 
                                 {/* 👇👇👇 THAY ĐỔI Ở ĐÂY: Thêm {app.icon} vào trước tên 👇👇👇 */}
                                 <span className="font-bold text-slate-700 truncate flex-1">
-                                    {app.icon} {app.name}
+                                    {app.name}
                                 </span>
                                 
                                 <button onClick={(e) => {e.stopPropagation(); handleDeleteApp(app.sheetName);}} className="text-slate-400 hover:text-red-500 p-1">

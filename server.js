@@ -245,6 +245,8 @@ app.post('/api/save-app', (req, res) => {
         // Nhận thêm biến oldSheetName từ Frontend gửi lên
         const { oldSheetName, ...newApp } = req.body;
         
+        newApp.tabTitle = newApp.name;
+        
         let apps = [];
         if (fs.existsSync(APPS_PATH)) {
             apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));

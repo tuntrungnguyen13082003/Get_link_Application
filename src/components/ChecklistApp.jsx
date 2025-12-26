@@ -10,7 +10,7 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
   const [sessionStatus, setSessionStatus] = useState("checking"); 
   const [realCode, setRealCode] = useState(""); 
 
-  // THAY ĐỔI: Trỏ về cổng 3001 của Server thay vì Google
+  // THAY ĐỔI: Trỏ về cổng  thay vì Google
   const BACKEND_URL = import.meta.env.VITE_API_URL; 
 
 const urlParts = window.location.href.split('code=');
@@ -21,13 +21,6 @@ console.log("Mã lấy được từ URL là:", fakeTokenFromUrl);
   useEffect(() => {
 const checkTokenStatus = async () => {
     console.log("Đang bắt đầu gọi Server..."); // Thêm dòng này
-   // 1. CHỐT CHẶN: Kiểm tra xem link có chứa mã code/token không
-    // if (!fakeTokenFromUrl) {
-    //     setSessionStatus("invalid"); 
-    //     setIsCheckingCode(false); 
-    //     return;
-    // }
-
 
     try {
         // 2. GỬI YÊU CẦU: Tới server để kiểm tra 3 yếu tố
@@ -47,6 +40,7 @@ const checkTokenStatus = async () => {
             // Trường hợp 1: Mọi thứ OK (Khớp Token, Khớp App, Status là Active)
             setSessionStatus("active");
             setRealCode(data.realCode);
+            document.title = reportName;
         } else if (data.result === 'used') {
             // Trường hợp 2: Khớp Token, Khớp App nhưng Status là Used
             setSessionStatus("used");
@@ -62,7 +56,7 @@ const checkTokenStatus = async () => {
     }
 };
     checkTokenStatus();
-  }, [fakeTokenFromUrl, sheetName]);
+  }, [fakeTokenFromUrl, sheetName, reportName]);
 
   const handleImageCapture = (e, questionId) => {
     const file = e.target.files[0];
