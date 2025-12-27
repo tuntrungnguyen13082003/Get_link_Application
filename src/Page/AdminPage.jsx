@@ -454,7 +454,7 @@ const AdminPage = () => {
                                             <button 
                                                 onClick={() => {
                                                     const newQs = [...editingApp.questions];
-                                                    newQs[idx].hasPhoto = !newQs[idx].hasPhoto; // Đảo trạng thái true/false
+                                                    newQs[idx].hasPhoto = q.hasPhoto === false ? true : false;
                                                     setEditingApp({...editingApp, questions: newQs});
                                                 }}
                                                 className={`text-[10px] font-bold px-3 py-1 rounded-full transition-all ${q.hasPhoto ? 'bg-green-600 text-white' : 'bg-slate-300 text-slate-600'}`}
@@ -462,7 +462,7 @@ const AdminPage = () => {
                                                 {q.hasPhoto ? "CÓ CHỤP HÌNH" : "CHỈ HIỂN THỊ (HƯỚNG DẪN)"}
                                             </button>
                                         </div>
-                                        
+
                                         <div className="flex gap-3 mb-2 pr-8">
                                             <div className="flex flex-col items-center gap-1">
                                                 <span className="text-[10px] font-bold text-slate-400 uppercase">STT</span>
