@@ -217,6 +217,7 @@ return (
                     {Array.isArray(currentQ.refImage) ? "Nhấn vào ảnh để xem rõ hơn" : "Ảnh mẫu tham khảo"}
                 </p>
             </div>
+            {currentQ.hasPhoto !== false && (
             <div className="flex flex-col gap-2">
                 <label className="block text-sm font-bold text-gray-700 ml-1">Ảnh thực tế:</label>
                 <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-sm bg-white border-2 border-dashed border-blue-200 hover:border-blue-400 transition-colors group">
@@ -240,14 +241,16 @@ return (
                     )}
                 </div>
             </div>
+            )}
+
         </div>
         <div className="bg-white p-4 border-t border-gray-200 z-30">
             <div className="flex gap-3">
             <button onClick={() => setCurrentStep(Math.max(0, currentStep - 1))} disabled={currentStep === 0 || isUploading} className="px-4 py-3 rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30">
                 <ChevronLeft size={24} />
             </button>
-            <button onClick={handleNextOrSubmit} disabled={isUploading} className={`flex-1 py-3 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all ${isLastStep ? 'bg-green-600 hover:bg-green-700' : (hasCaptured ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400')}`}>
-                {isLastStep ? <><Upload size={20}/> HOÀN THÀNH</> : (hasCaptured ? <>Tiếp theo <ChevronRight size={20}/></> : <>Bỏ qua <ChevronRight size={20}/></>)}
+            <button onClick={handleNextOrSubmit} disabled={isUploading} className={`flex-1 py-3 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all ${isLastStep ? 'bg-green-600 hover:bg-green-700' : (hasCaptured || currentQ.hasPhoto === false ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400')}`}>
+                                                                                                                                                                                                                 {isLastStep ? <><Upload size={20}/> HOÀN THÀNH</> : (hasCaptured || currentQ.hasPhoto === false ? <>Tiếp theo <ChevronRight size={20}/></> : <>Bỏ qua <ChevronRight size={20}/></>)}
             </button>
             </div>
         </div>

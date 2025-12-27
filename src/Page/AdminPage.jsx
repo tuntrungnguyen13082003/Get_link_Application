@@ -433,7 +433,7 @@ const AdminPage = () => {
                             {/* --- DANH SÁCH CÂU HỎI (GIỮ NGUYÊN) --- */}
                             <div className="flex justify-between items-center mb-4 mt-8 pt-6 border-t border-slate-200">
                                 <h3 className="font-bold text-slate-700 flex items-center gap-2"><LayoutGrid size={18}/> DANH SÁCH CÂU HỎI</h3>
-                                <button onClick={() => setEditingApp({...editingApp, questions: [...editingApp.questions, {id: editingApp.questions.length + 1, title: '', desc: '', refImage: []}]})} className="text-sm bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-black font-bold flex items-center gap-2 shadow-lg transition-transform active:scale-95">
+                                <button onClick={() => setEditingApp({...editingApp, questions: [...editingApp.questions, {id: editingApp.questions.length + 1, title: '', desc: '', refImage: [], hasPhoto: true}]})} className="text-sm bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-black font-bold flex items-center gap-2 shadow-lg transition-transform active:scale-95">
                                     <Plus size={16}/> Thêm câu hỏi
                                 </button>
                             </div>
@@ -448,6 +448,20 @@ const AdminPage = () => {
                                 {editingApp.questions.map((q, idx) => (
                                     <div key={idx} className="border border-slate-200 p-4 rounded-xl bg-white shadow-sm relative group transition-all hover:shadow-md">
                                         <button onClick={() => { const newQs = editingApp.questions.filter((_, i) => i !== idx); setEditingApp({...editingApp, questions: newQs}); }} className="absolute top-3 right-3 text-slate-300 hover:text-red-500 p-1 transition-colors"><X size={20}/></button>
+                                       
+                                        <div className="flex items-center gap-2 mt-2 mb-2 bg-slate-50 p-2 rounded-lg border border-slate-100 w-fit">
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase">Yêu cầu chụp ảnh:</span>
+                                            <button 
+                                                onClick={() => {
+                                                    const newQs = [...editingApp.questions];
+                                                    newQs[idx].hasPhoto = !newQs[idx].hasPhoto; // Đảo trạng thái true/false
+                                                    setEditingApp({...editingApp, questions: newQs});
+                                                }}
+                                                className={`text-[10px] font-bold px-3 py-1 rounded-full transition-all ${q.hasPhoto ? 'bg-green-600 text-white' : 'bg-slate-300 text-slate-600'}`}
+                                            >
+                                                {q.hasPhoto ? "CÓ CHỤP HÌNH" : "CHỈ HIỂN THỊ (HƯỚNG DẪN)"}
+                                            </button>
+                                        </div>
                                         
                                         <div className="flex gap-3 mb-2 pr-8">
                                             <div className="flex flex-col items-center gap-1">
