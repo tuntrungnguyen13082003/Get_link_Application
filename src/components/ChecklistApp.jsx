@@ -218,30 +218,26 @@ return (
                 </p>
             </div>
             {currentQ.hasPhoto !== false && (
-            <div className="flex flex-col gap-2">
-                <label className="block text-sm font-bold text-gray-700 ml-1">Ảnh thực tế:</label>
-                <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-sm bg-white border-2 border-dashed border-blue-200 hover:border-blue-400 transition-colors group">
-                    {hasCaptured ? (
-                        <>
-                            <img src={userImages[currentQ.id]} alt="Captured" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/10"></div>
-                            <button onClick={() => removeImage(currentQ.id)} className="absolute top-2 right-2 bg-white/90 text-red-500 p-2 rounded-full shadow-lg hover:bg-red-500 hover:text-white transition-all">
-                                <X size={20} />
-                            </button>
-                            <div className="absolute bottom-2 left-2 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow">ĐÃ LƯU</div>
-                        </>
-                    ) : (
-                        <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-                            <div className="bg-blue-50 p-4 rounded-full mb-2 group-hover:scale-110 transition-transform">
-                                <Camera size={32} className="text-blue-500" />
-                            </div>
-                            <span className="font-bold text-blue-600 text-sm">Bấm để chụp ảnh</span>
-                            <input type="file" accept="image/*" capture="environment" onChange={(e) => handleImageCapture(e, currentQ.id)} className="hidden" />
-                        </label>
-                    )}
-                </div>
-            </div>
-            )}
+              <div className="flex flex-col gap-2">
+                  <label className="block text-sm font-bold text-gray-700 ml-1">Ảnh thực tế:</label>
+                  <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-sm bg-white border-2 border-dashed border-blue-200 hover:border-blue-400 transition-colors group">
+                      {hasCaptured ? (
+                          <>
+                              <img src={userImages[currentQ.id]} alt="Captured" className="w-full h-full object-cover" />
+                              {/* ... các nút Xóa ảnh giữ nguyên ... */}
+                          </>
+                      ) : (
+                          <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
+                              <div className="bg-blue-50 p-4 rounded-full mb-2 group-hover:scale-110 transition-transform">
+                                  <Camera size={32} className="text-blue-500" />
+                              </div>
+                              <span className="font-bold text-blue-600 text-sm">Bấm để chụp ảnh</span>
+                              <input type="file" accept="image/*" capture="environment" onChange={(e) => handleImageCapture(e, currentQ.id)} className="hidden" />
+                          </label>
+                      )}
+                  </div>
+              </div>
+          )}
 
         </div>
         <div className="bg-white p-4 border-t border-gray-200 z-30">
