@@ -9,6 +9,7 @@ const ChecklistApp = ({ sheetName, name, questions }) => {
   const [isCheckingCode, setIsCheckingCode] = useState(true); 
   const [sessionStatus, setSessionStatus] = useState("checking"); 
   const [realCode, setRealCode] = useState(""); 
+  const [selectedImageForModal, setSelectedImageForModal] = useState(null);
 
   // THAY ĐỔI: Trỏ về cổng 3001 của Server thay vì Google
   const BACKEND_URL = import.meta.env.VITE_API_URL; 
@@ -201,11 +202,16 @@ return (
                     {Array.isArray(currentQ.refImage) ? (
                         <div className="flex w-full h-full gap-1">
                             {currentQ.refImage.map((img, index) => (
-                                <div key={index} className="flex-1 h-full relative cursor-pointer group/img">
-                                    <img src={img} alt={`Ref ${index}`} className="w-full h-full object-contain bg-gray-200 hover:scale-105 transition-transform duration-300" />
-                                    <div className="absolute bottom-1 right-1 bg-black/40 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full">{index + 1}</div>
-                                </div>
-                            ))}
+                                  <div 
+                                      key={index} 
+                                      className="flex-1 h-full relative cursor-pointer group/img"
+                                      // 👇👇👇 THÊM DÒNG NÀY: Bấm vào thì set ảnh đó làm ảnh phóng to
+                                      onClick={() => setSelectedImageForModal(img)}
+                                  >
+                                      <img src={img} alt={`Ref ${index}`} className="w-full h-full object-contain bg-gray-200 hover:scale-105 transition-transform duration-300" />
+                                      <div className="absolute bottom-1 right-1 bg-black/40 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full">{index + 1}</div>
+                                  </div>
+                              ))}
                         </div>
                     ) : (
                         currentQ.refImage ? (
@@ -253,6 +259,33 @@ return (
             </div>
         </div>
       </div>
+      {/* ... (Phần code giao diện chính ở trên giữ nguyên) ... */}
+      {selectedImageForModal && (
+        // Lớp nền đen mờ, bấm vào nền cũng đóng modal
+        <div 
+            className="fixed inset-0 z-[70] bg-black/95 flex items-center justify-center p-2 md:p-8 animate-in fade-in duration-200 backdrop-blur-sm"
+            onClick={() => setSelectedImageForModal(null)}
+        >
+            {/* Nút đóng (X) ở góc */}
+            <button 
+                onClick={() => setSelectedImageForModal(null)}
+                className="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/30 rounded-full p-2 transition-all z-50"
+            >
+                <X size={32} />
+            </button>
+
+            {/* Ảnh lớn */}
+            <img 
+                src={selectedImageForModal} 
+                alt="Full screen reference" 
+                // Class giúp ảnh không bao giờ vượt quá màn hình, giữ đúng tỷ lệ
+                className="max-w-full max-h-full object-contain rounded animate-in zoom-in-95 duration-200 shadow-2xl drop-shadow-2xl"
+                // Chặn sự kiện click vào ảnh để không bị đóng modal nhầm
+                onClick={(e) => e.stopPropagation()} 
+            />
+             <p className="absolute bottom-4 text-white/50 text-sm">Bấm ra ngoài hoặc nút X để đóng</p>
+        </div>
+      )}
     </div>
   );
 };
