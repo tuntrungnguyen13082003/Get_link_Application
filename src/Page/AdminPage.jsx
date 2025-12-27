@@ -254,7 +254,7 @@ const AdminPage = () => {
     try {
       const res = await fetch(`${BACKEND_URL}/create-link`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: rawCode, token: t, sheet_name: currentApp.sheetName })
+        body: JSON.stringify({ code: rawCode, token: t, sheet_name: currentApp.sheetName, name: currentApp.name})
       });
       const r = await res.json();
       if (r.status === 'success') { setGeneratedLink(finalLink); handleCopy(finalLink); } 

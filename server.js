@@ -56,7 +56,7 @@ const upload = multer({ storage });
 // Đã xóa logic kiểm tra trùng theo yêu cầu mới
 app.post('/api/create-link', (req, res) => {
     // Nhận dữ liệu từ Admin gửi lên
-    const { code, token, sheet_name } = req.body;
+    const { code, token, sheet_name, name} = req.body;
     
     // 1. Đọc database hiện có
     const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
@@ -66,6 +66,7 @@ app.post('/api/create-link', (req, res) => {
         realCode: code,
         token: token,
         sheetName: sheet_name,
+        name: name,
         status: 'active',
         createdAt: new Date().toISOString()
     });
