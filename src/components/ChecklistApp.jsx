@@ -202,7 +202,7 @@ return (
                         <div className="flex w-full h-full gap-1">
                             {currentQ.refImage.map((img, index) => (
                                 <div key={index} className="flex-1 h-full relative cursor-pointer group/img">
-                                    <img src={img} alt={`Ref ${index}`} className="w-full h-full object-cover bg-gray-200 hover:scale-105 transition-transform duration-300" />
+                                    <img src={img} alt={`Ref ${index}`} className="w-full h-full object-contain bg-gray-200 hover:scale-105 transition-transform duration-300" />
                                     <div className="absolute bottom-1 right-1 bg-black/40 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full">{index + 1}</div>
                                 </div>
                             ))}
