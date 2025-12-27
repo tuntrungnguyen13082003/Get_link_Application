@@ -130,9 +130,7 @@ app.post('/api/upload-report', upload.single('file'), async (req, res) => { // <
         }
 
         // 2. Lấy tên Folder từ SheetName (Nếu không có thì đặt tên tạm)
-        const folderName = entry.sheetName || "Unknown_App"; 
-
-        console.log(`🚀 Đang gửi file sang Drive vào folder: ${folderName}...`);
+        const folderName = entry.sheetName; 
 
         // 3. Chuẩn bị gói dữ liệu gửi sang Apps Script
         const payload = {

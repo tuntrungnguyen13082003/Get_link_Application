@@ -11,7 +11,7 @@ const ChecklistRouter = ({ data }) => {
   // 1. Logic đổi tên Tab
   useEffect(() => {
     if (currentApp) {
-      document.title = currentApp.tabTitle || currentApp.name;
+      document.title = currentApp.name;
     }
     return () => { document.title = "App Báo Cáo"; };
   }, [currentApp]);
@@ -25,7 +25,7 @@ const ChecklistRouter = ({ data }) => {
   return (
     <ChecklistApp
       sheetName={currentApp.sheetName}
-      reportName={currentApp.reportName}
+      name={currentApp.name}
       questions={currentApp.questions}
     />
   );

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Camera, ChevronRight, ChevronLeft, Upload, RefreshCw, X, Loader } from 'lucide-react';
 import JSZip from 'jszip';
 
-const ChecklistApp = ({ sheetName, reportName, questions }) => {
+const ChecklistApp = ({ sheetName, name, questions }) => {
   const [currentStep, setCurrentStep] = useState(0); 
   const [userImages, setUserImages] = useState({});
   const [isUploading, setIsUploading] = useState(false);
@@ -14,8 +14,7 @@ const ChecklistApp = ({ sheetName, reportName, questions }) => {
   const BACKEND_URL = import.meta.env.VITE_API_URL; 
 
 const urlParts = window.location.href.split('code=');
-const fakeTokenFromUrl = urlParts.length > 1 ? urlParts[1] : null;
-console.log("Mã lấy được từ URL là:", fakeTokenFromUrl); 
+const fakeTokenFromUrl = urlParts.length > 1 ? urlParts[1] : null; 
 
   // --- LOGIC KIỂM TRA MÃ TRÊN SERVER NỘI BỘ ---
   useEffect(() => {
@@ -29,7 +28,7 @@ const checkTokenStatus = async () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 token: fakeTokenFromUrl,
-                sheetName: sheetName 
+                sheetName: sheetName,
             })
         });
 
@@ -83,10 +82,10 @@ const checkTokenStatus = async () => {
       const now = new Date();
       const datePrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
       const finalCode = String(realCode || "Unknown").trim(); 
-      const zipFileName = `${datePrefix}_${reportName}_${finalCode}.zip`;
+      const zipFileName = `${datePrefix}_${sheetName}_${finalCode}.zip`;
       
       const zip = new JSZip();
-      const imgFolder = zip.folder(`${reportName}_${finalCode}`);
+      const imgFolder = zip.folder(`${sheetName}_${finalCode}`);
       
       questions.forEach(q => {
         if (userImages[q.id]) imgFolder.file(`${q.id}.jpg`, userImages[q.id].split(',')[1], { base64: true });
@@ -96,7 +95,7 @@ const checkTokenStatus = async () => {
       // Dùng FormData để gửi file thật sự sang Backend
       const formData = new FormData();
       formData.append('file', zipBlob, zipFileName);
-      formData.append('type', 'anh_chup'); // Phân loại vào folder anh_chup
+      //formData.append('type', 'anh_chup'); // Phân loại vào folder anh_chup
       formData.append('appName', sheetName); // Tên folder ứng dụng (vd: SOLAR)
       formData.append('token', fakeTokenFromUrl); // Để server đánh dấu mã này đã dùng
 
