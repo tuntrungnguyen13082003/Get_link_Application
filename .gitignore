@@ -12,6 +12,8 @@ uploads/anh_chup/
 dist
 dist-ssr
 *.local
+apps.json
+database.json
 
 # Editor directories and files
 .vscode/*
