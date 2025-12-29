@@ -2,32 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { Camera, ChevronRight, ChevronLeft, Upload, RefreshCw, X, Loader } from 'lucide-react';
 import JSZip from 'jszip';
 
-const ChecklistApp = ({ sheetName, reportName, questions }) => {
+const ChecklistApp = ({ sheetName, name, questions }) => {
   const [currentStep, setCurrentStep] = useState(0); 
   const [userImages, setUserImages] = useState({});
   const [isUploading, setIsUploading] = useState(false);
   const [isCheckingCode, setIsCheckingCode] = useState(true); 
   const [sessionStatus, setSessionStatus] = useState("checking"); 
   const [realCode, setRealCode] = useState(""); 
+  const [selectedImageForModal, setSelectedImageForModal] = useState(null);
 
   // THAY ĐỔI: Trỏ về cổng 3001 của Server thay vì Google
-  const BACKEND_URL = "http://solar-field.ddns.net:17004/api"; 
+  const BACKEND_URL = import.meta.env.VITE_API_URL; 
 
 const urlParts = window.location.href.split('code=');
-const fakeTokenFromUrl = urlParts.length > 1 ? urlParts[1] : null;
-console.log("Mã lấy được từ URL là:", fakeTokenFromUrl); 
+const fakeTokenFromUrl = urlParts.length > 1 ? urlParts[1] : null; 
 
   // --- LOGIC KIỂM TRA MÃ TRÊN SERVER NỘI BỘ ---
   useEffect(() => {
 const checkTokenStatus = async () => {
     console.log("Đang bắt đầu gọi Server..."); // Thêm dòng này
-   // 1. CHỐT CHẶN: Kiểm tra xem link có chứa mã code/token không
-    // if (!fakeTokenFromUrl) {
-    //     setSessionStatus("invalid"); 
-    //     setIsCheckingCode(false); 
-    //     return;
-    // }
-
 
     try {
         // 2. GỬI YÊU CẦU: Tới server để kiểm tra 3 yếu tố
@@ -36,7 +29,7 @@ const checkTokenStatus = async () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 token: fakeTokenFromUrl,
-                sheetName: sheetName 
+                sheetName: sheetName,
             })
         });
 
@@ -84,44 +77,55 @@ const checkTokenStatus = async () => {
 
   // --- HÀM GỬI BÁO CÁO VỀ THƯ MỤC TRÊN SERVER ---
   const uploadReport = async () => {
-    if (Object.keys(userImages).length === 0 && !window.confirm("Gửi báo cáo rỗng?")) return;
-    setIsUploading(true);
-    try {
-      const now = new Date();
-      const datePrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-      const finalCode = String(realCode || "Unknown").trim(); 
-      const zipFileName = `${datePrefix}_${reportName}_${finalCode}.zip`;
-      
-      const zip = new JSZip();
-      const imgFolder = zip.folder(`${reportName}_${finalCode}`);
-      
-      questions.forEach(q => {
-        if (userImages[q.id]) imgFolder.file(`${q.id}.jpg`, userImages[q.id].split(',')[1], { base64: true });
-      });
-      const zipBlob = await zip.generateAsync({ type: "blob" });
-      
-      // Dùng FormData để gửi file thật sự sang Backend
-      const formData = new FormData();
-      formData.append('file', zipBlob, zipFileName);
-      formData.append('type', 'anh_chup'); // Phân loại vào folder anh_chup
-      formData.append('appName', sheetName); // Tên folder ứng dụng (vd: SOLAR)
-      formData.append('token', fakeTokenFromUrl); // Để server đánh dấu mã này đã dùng
+      if (Object.keys(userImages).length === 0 && !window.confirm("Gửi báo cáo rỗng?")) return;
+      setIsUploading(true);
+      try {
+        const now = new Date();
+        
+        // 1. Tạo chuỗi yyyymmdd
+        const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+        
+        // 2. Tạo chuỗi hhmmss (Giờ phút giây)
+        const timeStr = `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+        
+        const finalCode = String(realCode || "Unknown").trim(); 
+        
+        // 3. Ghép tên theo định dạng: yyyymmdd_hhmmss_TênFolder_MãCode
+        const baseName = `${dateStr}_${timeStr}_${sheetName}_${finalCode}`;
+        const zipFileName = `${baseName}.zip`;
+        
+        const zip = new JSZip();
+        // Folder bên trong Zip cũng dùng chung định dạng tên này
+        const imgFolder = zip.folder(baseName);
+        
+        questions.forEach(q => {
+          if (userImages[q.id]) {
+              imgFolder.file(`${q.id}.jpg`, userImages[q.id].split(',')[1], { base64: true });
+          }
+        });
+        
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        
+        const formData = new FormData();
+        formData.append('file', zipBlob, zipFileName);
+        formData.append('appName', sheetName); 
+        formData.append('token', fakeTokenFromUrl); 
 
-      const response = await fetch(`${BACKEND_URL}/upload-report`, {
-        method: "POST",
-        body: formData // Gửi trực tiếp file Zip
-      });
+        const response = await fetch(`${BACKEND_URL}/upload-report`, {
+          method: "POST",
+          body: formData 
+        });
 
-      const result = await response.json();
-      if (result.status === 'success') {
-          alert("✅ Báo cáo đã gửi và lưu về server thành công!");
-          setSessionStatus("used");
-      } else throw new Error(result.message);
-    } catch (error) {
-      alert("❌ Lỗi gửi báo cáo: " + error.message);
-    } finally {
-      setIsUploading(false);
-    }
+        const result = await response.json();
+        if (result.status === 'success') {
+            alert("✅ Báo cáo đã gửi và lưu về server thành công!");
+            setSessionStatus("used");
+        } else throw new Error(result.message);
+      } catch (error) {
+        alert("❌ Lỗi gửi báo cáo: " + error.message);
+      } finally {
+        setIsUploading(false);
+      }
   };
 
   const handleNextOrSubmit = () => {
@@ -192,15 +196,22 @@ return (
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                 <p className="text-gray-700 text-sm mb-3 font-medium">{currentQ.desc}</p>
-                <div className="bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative group h-48">
+                <div className={`bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative group transition-all duration-500 ${
+                        currentQ.hasPhoto === false ? 'h-96' : 'h-48'
+                    }`}>
                     {Array.isArray(currentQ.refImage) ? (
                         <div className="flex w-full h-full gap-1">
                             {currentQ.refImage.map((img, index) => (
-                                <div key={index} className="flex-1 h-full relative cursor-pointer group/img">
-                                    <img src={img} alt={`Ref ${index}`} className="w-full h-full object-contain bg-gray-200 hover:scale-105 transition-transform duration-300" />
-                                    <div className="absolute bottom-1 right-1 bg-black/40 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full">{index + 1}</div>
-                                </div>
-                            ))}
+                                  <div 
+                                      key={index} 
+                                      className="flex-1 h-full relative cursor-pointer group/img"
+                                      // 👇👇👇 THÊM DÒNG NÀY: Bấm vào thì set ảnh đó làm ảnh phóng to
+                                      onClick={() => setSelectedImageForModal(img)}
+                                  >
+                                      <img src={img} alt={`Ref ${index}`} className="w-full h-full object-contain bg-gray-200 hover:scale-105 transition-transform duration-300" />
+                                      <div className="absolute bottom-1 right-1 bg-black/40 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full">{index + 1}</div>
+                                  </div>
+                              ))}
                         </div>
                     ) : (
                         currentQ.refImage ? (
@@ -214,41 +225,67 @@ return (
                     {Array.isArray(currentQ.refImage) ? "Nhấn vào ảnh để xem rõ hơn" : "Ảnh mẫu tham khảo"}
                 </p>
             </div>
-            <div className="flex flex-col gap-2">
-                <label className="block text-sm font-bold text-gray-700 ml-1">Ảnh thực tế:</label>
-                <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-sm bg-white border-2 border-dashed border-blue-200 hover:border-blue-400 transition-colors group">
-                    {hasCaptured ? (
-                        <>
-                            <img src={userImages[currentQ.id]} alt="Captured" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/10"></div>
-                            <button onClick={() => removeImage(currentQ.id)} className="absolute top-2 right-2 bg-white/90 text-red-500 p-2 rounded-full shadow-lg hover:bg-red-500 hover:text-white transition-all">
-                                <X size={20} />
-                            </button>
-                            <div className="absolute bottom-2 left-2 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow">ĐÃ LƯU</div>
-                        </>
-                    ) : (
-                        <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-                            <div className="bg-blue-50 p-4 rounded-full mb-2 group-hover:scale-110 transition-transform">
-                                <Camera size={32} className="text-blue-500" />
-                            </div>
-                            <span className="font-bold text-blue-600 text-sm">Bấm để chụp ảnh</span>
-                            <input type="file" accept="image/*" capture="environment" onChange={(e) => handleImageCapture(e, currentQ.id)} className="hidden" />
-                        </label>
-                    )}
-                </div>
-            </div>
+            {currentQ.hasPhoto !== false && (
+              <div className="flex flex-col gap-2">
+                  <label className="block text-sm font-bold text-gray-700 ml-1">Ảnh thực tế:</label>
+                  <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-sm bg-white border-2 border-dashed border-blue-200 hover:border-blue-400 transition-colors group">
+                      {hasCaptured ? (
+                          <>
+                              <img src={userImages[currentQ.id]} alt="Captured" className="w-full h-full object-cover" />
+                              {/* ... các nút Xóa ảnh giữ nguyên ... */}
+                          </>
+                      ) : (
+                          <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
+                              <div className="bg-blue-50 p-4 rounded-full mb-2 group-hover:scale-110 transition-transform">
+                                  <Camera size={32} className="text-blue-500" />
+                              </div>
+                              <span className="font-bold text-blue-600 text-sm">Bấm để chụp ảnh</span>
+                              <input type="file" accept="image/*" capture="environment" onChange={(e) => handleImageCapture(e, currentQ.id)} className="hidden" />
+                          </label>
+                      )}
+                  </div>
+              </div>
+          )}
+
         </div>
         <div className="bg-white p-4 border-t border-gray-200 z-30">
             <div className="flex gap-3">
             <button onClick={() => setCurrentStep(Math.max(0, currentStep - 1))} disabled={currentStep === 0 || isUploading} className="px-4 py-3 rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30">
                 <ChevronLeft size={24} />
             </button>
-            <button onClick={handleNextOrSubmit} disabled={isUploading} className={`flex-1 py-3 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all ${isLastStep ? 'bg-green-600 hover:bg-green-700' : (hasCaptured ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400')}`}>
-                {isLastStep ? <><Upload size={20}/> HOÀN THÀNH</> : (hasCaptured ? <>Tiếp theo <ChevronRight size={20}/></> : <>Bỏ qua <ChevronRight size={20}/></>)}
+            <button onClick={handleNextOrSubmit} disabled={isUploading} className={`flex-1 py-3 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all ${isLastStep ? 'bg-green-600 hover:bg-green-700' : (hasCaptured || currentQ.hasPhoto === false ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400')}`}>
+                                                                                                                                                                                                                 {isLastStep ? (<><Upload size={20}/> HOÀN THÀNH</>) : ( (hasCaptured || currentQ.hasPhoto === false) ? <>Tiếp theo <ChevronRight size={20}/></> : <>Bỏ qua <ChevronRight size={20}/></>)}
             </button>
             </div>
         </div>
       </div>
+      {/* ... (Phần code giao diện chính ở trên giữ nguyên) ... */}
+      {selectedImageForModal && (
+        // Lớp nền đen mờ, bấm vào nền cũng đóng modal
+        <div 
+            className="fixed inset-0 z-[70] bg-black/95 flex items-center justify-center p-2 md:p-8 animate-in fade-in duration-200 backdrop-blur-sm"
+            onClick={() => setSelectedImageForModal(null)}
+        >
+            {/* Nút đóng (X) ở góc */}
+            <button 
+                onClick={() => setSelectedImageForModal(null)}
+                className="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/30 rounded-full p-2 transition-all z-50"
+            >
+                <X size={32} />
+            </button>
+
+            {/* Ảnh lớn */}
+            <img 
+                src={selectedImageForModal} 
+                alt="Full screen reference" 
+                // Class giúp ảnh không bao giờ vượt quá màn hình, giữ đúng tỷ lệ
+                className="max-w-full max-h-full object-contain rounded animate-in zoom-in-95 duration-200 shadow-2xl drop-shadow-2xl"
+                // Chặn sự kiện click vào ảnh để không bị đóng modal nhầm
+                onClick={(e) => e.stopPropagation()} 
+            />
+             <p className="absolute bottom-4 text-white/50 text-sm">Bấm ra ngoài hoặc nút X để đóng</p>
+        </div>
+      )}
     </div>
   );
 };

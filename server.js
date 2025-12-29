@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import axios from 'axios';
+import dotenv from 'dotenv';
 
 const app = express();
 app.use(cors());
@@ -14,12 +15,15 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DB_PATH = path.join(__dirname, 'database.json');
+dotenv.config({ path: path.join(__dirname, 'data', '.env') });
+
+// Thêm 'data' vào đường dẫn
+const DB_PATH = path.join(__dirname, 'data', 'database.json');
+const USERS_PATH = path.join(__dirname, 'data', 'users.json');
+const APPS_PATH = path.join(__dirname, 'data', 'apps.json');
+
+// 👇 GIỮ NGUYÊN: Các folder ảnh vẫn ở vị trí cũ
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
-
-const USERS_PATH = path.join(__dirname, 'users.json');
-
-const APPS_PATH = path.join(__dirname, 'apps.json');
 const CONFIG_IMAGES_DIR = path.join(__dirname, 'uploads', 'config_images');
 
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyICx-t7Q7JdaBu1puFflC5ILZEsYbHB6eEfnz0ToCFoi-jEw8nNRDTC_hS7rGkREYsA/exec";
@@ -52,7 +56,7 @@ const upload = multer({ storage });
 // Đã xóa logic kiểm tra trùng theo yêu cầu mới
 app.post('/api/create-link', (req, res) => {
     // Nhận dữ liệu từ Admin gửi lên
-    const { code, token, sheet_name } = req.body;
+    const { code, token, sheet_name, name} = req.body;
     
     // 1. Đọc database hiện có
     const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
@@ -62,6 +66,7 @@ app.post('/api/create-link', (req, res) => {
         realCode: code,
         token: token,
         sheetName: sheet_name,
+        name: name,
         status: 'active',
         createdAt: new Date().toISOString()
     });
@@ -125,9 +130,7 @@ app.post('/api/upload-report', upload.single('file'), async (req, res) => { // <
         }
 
         // 2. Lấy tên Folder từ SheetName (Nếu không có thì đặt tên tạm)
-        const folderName = entry.sheetName || "Unknown_App"; 
-
-        console.log(`🚀 Đang gửi file sang Drive vào folder: ${folderName}...`);
+        const folderName = entry.sheetName; 
 
         // 3. Chuẩn bị gói dữ liệu gửi sang Apps Script
         const payload = {
@@ -213,21 +216,57 @@ app.get('/api/apps', (req, res) => {
 });
 
 // --- 10. API: LƯU ỨNG DỤNG (Thêm mới / Cập nhật) ---
+// app.post('/api/save-app', (req, res) => {
+//     try {
+//         const newApp = req.body;
+//         // Đọc file cũ
+//         let apps = [];
+//         if (fs.existsSync(APPS_PATH)) {
+//             apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
+//         }
+        
+//         // Kiểm tra xem ID đã có chưa để update hay push mới
+//         const index = apps.findIndex(a => a.sheetName === newApp.sheetName);
+//         if (index !== -1) {
+//             apps[index] = newApp; // Cập nhật
+//         } else {
+//             apps.push(newApp); // Thêm mới
+//         }
+
+//         fs.writeFileSync(APPS_PATH, JSON.stringify(apps, null, 2));
+//         res.json({ status: 'success', message: 'Đã lưu cấu hình ứng dụng!' });
+//     } catch (e) {
+//         res.status(500).json({ status: 'error', message: 'Lỗi lưu dữ liệu: ' + e.message });
+//     }
+// });
 app.post('/api/save-app', (req, res) => {
     try {
-        const newApp = req.body;
-        // Đọc file cũ
+        // Nhận thêm biến oldSheetName từ Frontend gửi lên
+        const { oldSheetName, ...newApp } = req.body;
+        
         let apps = [];
         if (fs.existsSync(APPS_PATH)) {
             apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
         }
         
-        // Kiểm tra xem ID đã có chưa để update hay push mới
-        const index = apps.findIndex(a => a.sheetName === newApp.sheetName);
-        if (index !== -1) {
-            apps[index] = newApp; // Cập nhật
+        let index = -1;
+
+        // LOGIC TÌM VỊ TRÍ CẦN SỬA:
+        if (oldSheetName) {
+            // Trường hợp 1: Đang sửa (User gửi lên tên cũ) -> Tìm theo tên cũ
+            index = apps.findIndex(a => a.sheetName === oldSheetName);
         } else {
-            apps.push(newApp); // Thêm mới
+            // Trường hợp 2: Tạo mới hoặc logic cũ -> Tìm theo tên mới
+            index = apps.findIndex(a => a.sheetName === newApp.sheetName);
+        }
+
+        if (index !== -1) {
+            // --- CẬP NHẬT ---
+            // Giữ lại các thông tin cũ không bị sửa (nếu cần), ghi đè thông tin mới
+            apps[index] = { ...apps[index], ...newApp };
+        } else {
+            // --- THÊM MỚI ---
+            apps.push(newApp);
         }
 
         fs.writeFileSync(APPS_PATH, JSON.stringify(apps, null, 2));
@@ -310,8 +349,10 @@ app.post('/api/admin/delete-sheet', (req, res) => {
     } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-app.listen(17004, '0.0.0.0', () => {
-    console.log('✅ Backend Server đang chạy tại cổng 17004 (ES Module mode)');
+const PORT = process.env.PORT;
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Backend Server đang chạy tại cổng ${PORT} (ES Module mode)`);
 });
 
 // --- 4. API: ĐĂNG NHẬP ---
@@ -391,4 +432,8 @@ app.post('/api/delete-user', (req, res) => {
 
     fs.writeFileSync(USERS_PATH, JSON.stringify(newUsers, null, 2));
     res.json({ status: 'success', message: 'Đã xóa tài khoản thành công!' });
+
 });
+
+
+

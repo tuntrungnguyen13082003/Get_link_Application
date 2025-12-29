@@ -3,7 +3,7 @@ import { Trash2, FileText, ExternalLink, ShieldAlert, FolderOpen, Copy, Check } 
 
 const AdminDashboard = ({ currentUser, apps }) => {
     // 👇 Sửa đúng IP/Port Server của bạn
-    const API_URL = "http://solar-field.ddns.net:17004/api"; 
+    const API_URL = import.meta.env.VITE_API_URL; 
     
     const [groupedData, setGroupedData] = useState({});
     const [activeSheet, setActiveSheet] = useState('');
@@ -76,13 +76,12 @@ const AdminDashboard = ({ currentUser, apps }) => {
 
     // 6. Hàm Mở Folder Drive (Tìm kiếm theo tên Sheet)
     const openDriveFolder = () => {
-        // 👇👇👇 DÁN ID FOLDER TỔNG CỦA BẠN VÀO ĐÂY 👇👇👇
-        const query = `type:folder ${activeSheet}`;
+        // 👇 THAY bằng chuỗi ký tự ID thực tế trên thanh địa chỉ Google Drive
+        const FOLDER_ID = '1rApCukRbxjEXLSN7zIFW1rmTYZQBoS-9';
         
-        // Tạo link tìm kiếm
-        const driveSearchUrl = `https://drive.google.com/drive/u/0/search?q=${encodeURIComponent(query)}`;
+        const driveUrl = `https://drive.google.com/drive/u/0/folders/${FOLDER_ID}`;
         
-        window.open(driveSearchUrl, '_blank');
+        window.open(driveUrl, '_blank');
     };
 
     // 7. Copy Link
@@ -212,5 +211,6 @@ const AdminDashboard = ({ currentUser, apps }) => {
         </div>
     );
 };
+
 
 export default AdminDashboard;
