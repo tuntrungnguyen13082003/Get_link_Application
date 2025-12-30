@@ -77,55 +77,47 @@ const checkTokenStatus = async () => {
 
   // --- HÀM GỬI BÁO CÁO VỀ THƯ MỤC TRÊN SERVER ---
   const uploadReport = async () => {
-      if (Object.keys(userImages).length === 0 && !window.confirm("Gửi báo cáo rỗng?")) return;
-      setIsUploading(true);
-      try {
-        const now = new Date();
-        
-        // 1. Tạo chuỗi yyyymmdd
-        const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-        
-        // 2. Tạo chuỗi hhmmss (Giờ phút giây)
-        const timeStr = `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
-        
-        const finalCode = String(realCode || "Unknown").trim(); 
-        
-        // 3. Ghép tên theo định dạng: yyyymmdd_hhmmss_TênFolder_MãCode
-        const baseName = `${dateStr}_${timeStr}_${sheetName}_${finalCode}`;
-        const zipFileName = `${baseName}.zip`;
-        
-        const zip = new JSZip();
-        // Folder bên trong Zip cũng dùng chung định dạng tên này
-        const imgFolder = zip.folder(baseName);
-        
-        questions.forEach(q => {
-          if (userImages[q.id]) {
-              imgFolder.file(`${q.id}.jpg`, userImages[q.id].split(',')[1], { base64: true });
-          }
-        });
-        
-        const zipBlob = await zip.generateAsync({ type: "blob" });
-        
-        const formData = new FormData();
-        formData.append('file', zipBlob, zipFileName);
-        formData.append('appName', sheetName); 
-        formData.append('token', fakeTokenFromUrl); 
+    if (Object.keys(userImages).length === 0 && !window.confirm("Gửi báo cáo rỗng?")) return;
+    setIsUploading(true);
+    try {
+      const now = new Date();
+      const datePrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+      const finalCode = String(realCode || "Unknown").trim(); 
+      
+      // Tên Folder báo cáo
+      const reportFolderName = `${datePrefix}_${reportName}_${finalCode}`;
+      
+      // --- TẠO DANH SÁCH ẢNH (Thay vì nén Zip) ---
+      const imagesToSend = [];
+      questions.forEach(q => {
+        if (userImages[q.id]) {
+          imagesToSend.push({
+             name: `${q.id}.jpg`, // Tên file ảnh (vd: q1.jpg)
+             data: userImages[q.id].split(',')[1] // Chỉ lấy phần base64 phía sau dấu phẩy
+          });
+        }
+      });
 
-        const response = await fetch(`${BACKEND_URL}/upload-report`, {
-          method: "POST",
-          body: formData 
-        });
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            folderName: reportFolderName, // Gửi tên folder muốn tạo
+            images: imagesToSend,         // Gửi danh sách ảnh
+            token: finalCode, 
+            sheet_name: sheetName
+        })
+      });
 
-        const result = await response.json();
-        if (result.status === 'success') {
-            alert("✅ Báo cáo đã gửi và lưu về server thành công!");
-            setSessionStatus("used");
-        } else throw new Error(result.message);
-      } catch (error) {
-        alert("❌ Lỗi gửi báo cáo: " + error.message);
-      } finally {
-        setIsUploading(false);
-      }
+      const result = await response.json();
+      if (result.status === 'success') {
+          alert("✅ Báo cáo đã gửi thành công!");
+          setSessionStatus("used");
+      } else throw new Error(result.message);
+    } catch (error) {
+      alert("❌ Lỗi: " + error.message);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleNextOrSubmit = () => {
