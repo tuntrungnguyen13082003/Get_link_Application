@@ -522,12 +522,13 @@ const AdminPage = () => {
                                             <button 
                                                 onClick={() => {
                                                     const newQs = [...editingApp.questions];
-                                                    newQs[idx].hasPhoto = q.hasPhoto === false ? true : false;
+                                                    const currentValue = q.hasPhoto !== false;
+                                                    newQs[idx].hasPhoto = !currentValue;
                                                     setEditingApp({...editingApp, questions: newQs});
                                                 }}
-                                                className={`text-[10px] font-bold px-3 py-1 rounded-full transition-all ${q.hasPhoto ? 'bg-green-600 text-white' : 'bg-slate-300 text-slate-600'}`}
+                                                className={`text-[10px] font-bold px-3 py-1 rounded-full transition-all ${q.hasPhoto !== false ? 'bg-green-600 text-white' : 'bg-slate-300 text-slate-600'}`}
                                             >
-                                                {q.hasPhoto ? "CÓ CHỤP HÌNH" : "CHỈ HIỂN THỊ (HƯỚNG DẪN)"}
+                                                {q.hasPhoto !== false ? "CÓ CHỤP HÌNH" : "CHỈ HIỂN THỊ (HƯỚNG DẪN)"}
                                             </button>
                                         </div>
 
