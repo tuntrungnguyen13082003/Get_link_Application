@@ -197,7 +197,7 @@ const AdminPage = () => {
     if (!editingApp?.sheetName) return alert("Chưa có ứng dụng để xuất!");
     if (confirm(`Tải về bản sao lưu của "${editingApp.name}"?`)) {
        // Gọi thẳng link API để trình duyệt tải file
-       window.location.href = `${BACKEND_URL}/api/export-app/${editingApp.sheetName}`;
+       window.location.href = `${BACKEND_URL}/export-app/${editingApp.sheetName}`;
     }
   };
 
