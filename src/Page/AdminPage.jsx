@@ -214,7 +214,7 @@ const AdminPage = () => {
     formData.append('file', file);
 
     try {
-      const res = await fetch(`${BACKEND_URL}/api/import-app`, {
+      const res = await fetch(`${BACKEND_URL}/import-app`, {
         method: 'POST',
         body: formData
       });
