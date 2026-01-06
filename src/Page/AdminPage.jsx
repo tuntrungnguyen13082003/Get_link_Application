@@ -494,7 +494,7 @@ const AdminPage = () => {
                                     <input 
                                         className="w-full p-3 border border-slate-300 rounded-xl font-bold text-lg text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none placeholder:font-normal" 
                                         value={editingApp.name} 
-                                        onChange={e => setEditingApp({ ...editingApp, name: e.target.value, tabTitle: e.target.value })} 
+                                        onChange={e => setEditingApp({ ...editingApp, name: e.target.value})} 
                                         placeholder="VD: Checklist Bảo Trì Solar"
                                     />
                                     <p className="text-[11px] text-slate-400 mt-2">Tên này sẽ hiển thị trên giao diện chính.</p>
