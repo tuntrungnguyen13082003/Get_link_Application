@@ -263,7 +263,15 @@ app.post('/api/delete-app', (req, res) => {
         let apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
         const newApps = apps.filter(a => a.sheetName !== sheetName);
         fs.writeFileSync(APPS_PATH, JSON.stringify(newApps, null, 2));
-        res.json({ status: 'success', message: 'Đã xóa ứng dụng!' });
+
+        const appImageFolder = path.join(CONFIG_IMAGES_DIR, sheetName);
+        if (fs.existsSync(appImageFolder)) {
+            // Lệnh này xóa folder bất kể bên trong có file hay không
+            fs.rmSync(appImageFolder, { recursive: true, force: true });
+            console.log(`🗑️ Đã xóa sạch folder ảnh: ${appImageFolder}`);
+        }
+
+        res.json({ status: 'success', message: 'Đã xóa ứng dụng và toàn bộ ảnh liên quan!' });
     } catch (e) {
         res.status(500).json({ status: 'error', message: e.message });
     }
