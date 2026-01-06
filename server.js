@@ -381,50 +381,72 @@ app.post('/api/import-all-apps', upload.single('file'), (req, res) => {
         const zip = new AdmZip(req.file.buffer);
         const zipEntries = zip.getEntries();
 
-        // 1. XỬ LÝ FILE APPS.JSON (Logic Gộp)
+        // 1. XỬ LÝ FILE APPS.JSON (Giữ nguyên logic gộp App)
         const appsEntry = zipEntries.find(entry => entry.entryName === "apps.json");
+        let addedAppsCount = 0;
         
         if (appsEntry) {
-            // A. Đọc dữ liệu từ file Backup
             const backupApps = JSON.parse(appsEntry.getData().toString("utf8"));
-
-            // B. Đọc dữ liệu hiện tại trên Server (nếu có)
+            
             let currentApps = [];
             if (fs.existsSync(APPS_PATH)) {
-                try {
-                    currentApps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
-                } catch (err) {
-                    currentApps = []; // Nếu file lỗi thì coi như rỗng
-                }
+                try { currentApps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8')); } catch (err) { currentApps = []; }
             }
 
-            // C. Thuật toán GỘP (Merge): Chỉ thêm những app chưa có
-            let addedCount = 0;
             backupApps.forEach(backupApp => {
-                // Kiểm tra xem App này đã có trên server chưa (dựa theo sheetName)
                 const exists = currentApps.find(curr => curr.sheetName === backupApp.sheetName);
-                
                 if (!exists) {
-                    // Nếu chưa có -> Thêm vào danh sách
                     currentApps.push(backupApp);
-                    addedCount++;
+                    addedAppsCount++;
                 }
-                // Nếu đã có rồi -> Giữ nguyên cái đang có trên Server (Không ghi đè cái cũ lên cái mới)
             });
 
-            // D. Lưu lại danh sách mới đã gộp
             fs.writeFileSync(APPS_PATH, JSON.stringify(currentApps, null, 2));
-            console.log(`✅ Đã gộp thêm ${addedCount} ứng dụng từ file backup.`);
         }
 
-        // 2. KHÔI PHỤC ẢNH (Ghi đè/Thêm mới ảnh vào folder)
-        // AdmZip tự động thêm ảnh mới và ghi đè ảnh trùng tên, không xóa ảnh của App khác
-        zip.extractAllTo(UPLOADS_DIR, true); 
+        // 2. XỬ LÝ ẢNH (Logic mới: CHECK FOLDER)
+        let restoredFoldersCount = 0;
 
-        res.json({ status: 'success', message: 'Đã gộp dữ liệu thành công! Ứng dụng hiện tại vẫn được giữ nguyên.' });
+        // B1: Lấy danh sách các Folder ĐANG CÓ trên Server
+        // VD: ['SOLAR', 'CONG_TO', 'APP_MOI']
+        let existingFolders = [];
+        if (fs.existsSync(CONFIG_IMAGES_DIR)) {
+            existingFolders = fs.readdirSync(CONFIG_IMAGES_DIR);
+        }
+
+        // B2: Duyệt file trong ZIP
+        zipEntries.forEach(entry => {
+            // Chỉ quan tâm file nằm trong config_images/
+            // entryName VD: "config_images/SOLAR/img_01.jpg"
+            if (entry.entryName.startsWith("config_images/") && !entry.isDirectory) {
+                
+                const parts = entry.entryName.split('/'); 
+                // parts[0] = "config_images"
+                // parts[1] = "SOLAR" (Tên Folder App)
+                
+                if (parts.length >= 3) {
+                    const appFolderName = parts[1];
+
+                    // 🔥 KIỂM TRA QUAN TRỌNG:
+                    // Nếu folder này ĐÃ CÓ trên server -> BỎ QUA (Không giải nén ảnh này)
+                    if (existingFolders.includes(appFolderName)) {
+                        return; 
+                    }
+
+                    // Nếu folder này CHƯA CÓ (đã bị xóa) -> Giải nén ảnh ra
+                    // (Hàm này sẽ tự tạo folder nếu thiếu)
+                    zip.extractEntryTo(entry, UPLOADS_DIR, true, false);
+                }
+            }
+        });
+
+        res.json({ 
+            status: 'success', 
+            message: `Đã gộp thành công!\n➕ Khôi phục ${addedAppsCount} ứng dụng bị thiếu.\n📷 Ảnh của các ứng dụng hiện có được GIỮ NGUYÊN.` 
+        });
 
     } catch (e) {
-        console.error("Lỗi Import Merge:", e);
+        console.error("Lỗi Import:", e);
         res.status(500).json({ status: 'error', message: "Lỗi Server: " + e.message });
     }
 });
