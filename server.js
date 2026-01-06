@@ -364,47 +364,6 @@ app.post('/api/delete-image', (req, res) => {
 
 const PORT = process.env.PORT;
 
-// --- 13. API: EXPORT ỨNG DỤNG (TẠO FILE BACKUP ZIP) ---
-app.get('/api/export-app/:sheetName', (req, res) => {
-    try {
-        const { sheetName } = req.params;
-
-        // 1. Tìm thông tin ứng dụng trong apps.json
-        const apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
-        const targetApp = apps.find(a => a.sheetName === sheetName);
-
-        if (!targetApp) return res.status(404).send('Không tìm thấy ứng dụng!');
-
-        // 2. Khởi tạo file ZIP
-        const zip = new AdmZip();
-
-        // 3. Thêm file cấu hình (config.json) vào ZIP
-        // Đây chính là thông tin câu hỏi, tên app, mô tả...
-        zip.addFile("config.json", Buffer.from(JSON.stringify(targetApp, null, 2), "utf8"));
-
-        // 4. Tìm và thêm các ảnh minh họa vào ZIP
-        // Giả sử ảnh được lưu trong folder: uploads/config_images/{sheetName}/
-        const appImageFolder = path.join(CONFIG_IMAGES_DIR, sheetName);
-        
-        if (fs.existsSync(appImageFolder)) {
-            // Thêm toàn bộ folder ảnh của app này vào ZIP dưới tên "ref_images"
-            zip.addLocalFolder(appImageFolder, "ref_images");
-        }
-
-        // 5. Trả file ZIP về cho trình duyệt tải xuống
-        const downloadName = `${sheetName}_backup_${Date.now()}.zip`;
-        const data = zip.toBuffer();
-        
-        res.set('Content-Type', 'application/zip');
-        res.set('Content-Disposition', `attachment; filename=${downloadName}`);
-        res.set('Content-Length', data.length);
-        res.send(data);
-
-    } catch (e) {
-        console.error(e);
-        res.status(500).send("Lỗi tạo file backup: " + e.message);
-    }
-});
 
 // --- 14. API: IMPORT ỨNG DỤNG (KHÔI PHỤC TỪ ZIP) ---
 // Sử dụng upload.single('file') để nhận file zip

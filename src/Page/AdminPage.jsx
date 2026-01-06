@@ -196,14 +196,6 @@ const AdminPage = () => {
   };
 
   // --- HÀM MỚI: XỬ LÝ EXPORT & IMPORT ---
-  const handleExportApp = () => {
-    if (!editingApp?.sheetName) return alert("Chưa có ứng dụng để xuất!");
-    if (confirm(`Tải về bản sao lưu của "${editingApp.name}"?`)) {
-       // Gọi thẳng link API để trình duyệt tải file
-       window.location.href = `${BACKEND_URL}/export-app/${editingApp.sheetName}`;
-    }
-  };
-
   const handleImportFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -466,16 +458,6 @@ const AdminPage = () => {
                                                 <FileUp size={18}/> Import
                                             </button>
                                         </>
-                                    )}
-
-                                    {/* 2. NÚT EXPORT (Hiện khi đang sửa) */}
-                                    {editingApp.sheetName && (
-                                        <button 
-                                            onClick={handleExportApp}
-                                            className="bg-amber-100 text-amber-700 border border-amber-200 px-4 py-2 rounded-xl font-bold hover:bg-amber-200 flex items-center gap-2 shadow-sm transition-all"
-                                        >
-                                            <FileDown size={18}/> Backup
-                                        </button>
                                     )}
 
                                     {/* 3. NÚT LƯU (Cũ) */}
