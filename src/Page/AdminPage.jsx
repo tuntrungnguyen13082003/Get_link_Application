@@ -196,35 +196,41 @@ const AdminPage = () => {
   };
 
   // --- HÀM MỚI: XỬ LÝ EXPORT & IMPORT ---
-  const handleImportFile = async (e) => {
+  // --- HÀM MỚI: IMPORT TOÀN BỘ (Đã cập nhật thông báo) ---
+  const handleRestoreSystem = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     
-    // Reset input để chọn lại file cũ vẫn nhận
+    // Reset input để lần sau chọn lại file cũ vẫn nhận
     e.target.value = null;
 
-    if (!confirm("Dữ liệu từ file Backup sẽ được thêm vào hệ thống. Bạn có chắc chắn?")) return;
+    // 👇 SỬA CÂU THÔNG BÁO TẠI ĐÂY 👇
+    const msg = "Hệ thống sẽ GỘP dữ liệu từ file Backup vào danh sách hiện tại:\n\n" +
+                "➕ Ứng dụng mới: Sẽ được THÊM vào.\n" +
+                "🛡️ Ứng dụng trùng tên: Sẽ GIỮ NGUYÊN (Không bị ghi đè).\n\n" +
+                "Bạn có muốn tiếp tục không?";
+
+    if (!confirm(msg)) return;
 
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      const res = await fetch(`${BACKEND_URL}/import-app`, {
-        method: 'POST',
-        body: formData
-      });
-      const json = await res.json();
-      
-      if (json.status === 'success') {
-         alert("✅ " + json.message);
-         fetchApps(); // Tải lại danh sách để thấy app mới import
-         // Tùy chọn: Reset form về trạng thái tạo mới
-         handleNewApp(); 
-      } else {
-         alert("❌ Lỗi Import: " + json.message);
-      }
+        const res = await fetch(`${BACKEND_URL}/import-all-apps`, {
+            method: 'POST',
+            body: formData
+        });
+        const json = await res.json();
+        
+        if (json.status === 'success') {
+            alert("✅ " + json.message);
+            fetchApps(); // Tải lại danh sách để thấy ứng dụng cũ hiện ra
+            // Không cần setEditingApp(null) cũng được, để tiện so sánh
+        } else {
+            alert("❌ Lỗi: " + json.message);
+        }
     } catch (err) {
-      alert("Lỗi kết nối Server khi Import!");
+        alert("Lỗi kết nối Server khi Restore!");
     }
   };
 
@@ -450,7 +456,7 @@ const AdminPage = () => {
                                     {/* 1. NÚT IMPORT (Hiện khi tạo mới) */}
                                     {!editingApp.sheetName && (
                                         <>
-                                            <input type="file" ref={fileInputRef} onChange={handleImportFile} className="hidden" accept=".zip" />
+                                            <input type="file" ref={fileInputRef} onChange={handleRestoreSystem} className="hidden" accept=".zip" />
                                             <button 
                                                 onClick={() => fileInputRef.current.click()}
                                                 className="bg-white text-slate-600 border border-slate-300 px-4 py-2 rounded-xl font-bold hover:bg-slate-50 flex items-center gap-2 shadow-sm transition-all"

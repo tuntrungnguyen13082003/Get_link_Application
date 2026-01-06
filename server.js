@@ -365,70 +365,59 @@ app.post('/api/delete-image', (req, res) => {
 const PORT = process.env.PORT;
 
 
-// --- 14. API: IMPORT ỨNG DỤNG (KHÔI PHỤC TỪ ZIP) ---
-// Sử dụng upload.single('file') để nhận file zip
-app.post('/api/import-app', upload.single('file'), (req, res) => {
+// --- 14. API: KHÔI PHỤC TOÀN BỘ (CHẾ ĐỘ GỘP - MERGE) ---
+app.post('/api/import-all-apps', upload.single('file'), (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ status: 'error', message: 'Chưa gửi file ZIP' });
 
-        // 1. Đọc file ZIP từ bộ nhớ (Buffer)
         const zip = new AdmZip(req.file.buffer);
-        const zipEntries = zip.getEntries(); // Lấy danh sách file trong zip
+        const zipEntries = zip.getEntries();
 
-        // 2. Tìm file apps.json để lấy thông tin app
-        const configFile = zipEntries.find(entry => entry.entryName === "apps.json");
-        if (!configFile) {
-            return res.json({ status: 'error', message: 'File ZIP không hợp lệ (thiếu apps.json)' });
-        }
-
-        // Parse dữ liệu cấu hình
-        const appData = JSON.parse(configFile.getData().toString("utf8"));
-        const sheetName = appData.sheetName; // Lấy ID app (VD: SOLAR)
-
-        if (!sheetName) return res.json({ status: 'error', message: 'File cấu hình lỗi (thiếu sheetName)' });
-
-        // 3. Cập nhật vào apps.json
-        let apps = [];
-        if (fs.existsSync(APPS_PATH)) {
-            apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
-        }
-
-        // Kiểm tra xem đã tồn tại chưa
-        const index = apps.findIndex(a => a.sheetName === sheetName);
-        if (index !== -1) {
-            // Nếu có rồi -> Ghi đè (Update)
-            apps[index] = appData;
-        } else {
-            // Nếu chưa có -> Thêm mới
-            apps.push(appData);
-        }
-        fs.writeFileSync(APPS_PATH, JSON.stringify(apps, null, 2));
-
-        // 4. Giải nén ảnh vào folder uploads/config_images/{sheetName}
-        // Folder đích trên server
-        const targetImgFolder = path.join(CONFIG_IMAGES_DIR, sheetName);
+        // 1. XỬ LÝ FILE APPS.JSON (Logic Gộp)
+        const appsEntry = zipEntries.find(entry => entry.entryName === "apps.json");
         
-        // Tạo folder nếu chưa có
-        if (!fs.existsSync(targetImgFolder)) {
-            fs.mkdirSync(targetImgFolder, { recursive: true });
+        if (appsEntry) {
+            // A. Đọc dữ liệu từ file Backup
+            const backupApps = JSON.parse(appsEntry.getData().toString("utf8"));
+
+            // B. Đọc dữ liệu hiện tại trên Server (nếu có)
+            let currentApps = [];
+            if (fs.existsSync(APPS_PATH)) {
+                try {
+                    currentApps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
+                } catch (err) {
+                    currentApps = []; // Nếu file lỗi thì coi như rỗng
+                }
+            }
+
+            // C. Thuật toán GỘP (Merge): Chỉ thêm những app chưa có
+            let addedCount = 0;
+            backupApps.forEach(backupApp => {
+                // Kiểm tra xem App này đã có trên server chưa (dựa theo sheetName)
+                const exists = currentApps.find(curr => curr.sheetName === backupApp.sheetName);
+                
+                if (!exists) {
+                    // Nếu chưa có -> Thêm vào danh sách
+                    currentApps.push(backupApp);
+                    addedCount++;
+                }
+                // Nếu đã có rồi -> Giữ nguyên cái đang có trên Server (Không ghi đè cái cũ lên cái mới)
+            });
+
+            // D. Lưu lại danh sách mới đã gộp
+            fs.writeFileSync(APPS_PATH, JSON.stringify(currentApps, null, 2));
+            console.log(`✅ Đã gộp thêm ${addedCount} ứng dụng từ file backup.`);
         }
 
-        // Duyệt qua các file trong ZIP để tìm ảnh trong folder "ref_images/"
-        zipEntries.forEach(entry => {
-            // Nếu file nằm trong folder ref_images và không phải là folder
-            if (entry.entryName.startsWith("ref_images/") && !entry.isDirectory) {
-                const fileName = path.basename(entry.entryName); // Lấy tên file gốc (vd: q1.jpg)
-                
-                // Giải nén file đó vào đích
-                zip.extractEntryTo(entry, targetImgFolder, false, true);
-            }
-        });
+        // 2. KHÔI PHỤC ẢNH (Ghi đè/Thêm mới ảnh vào folder)
+        // AdmZip tự động thêm ảnh mới và ghi đè ảnh trùng tên, không xóa ảnh của App khác
+        zip.extractAllTo(UPLOADS_DIR, true); 
 
-        res.json({ status: 'success', message: `Đã khôi phục ứng dụng "${appData.name}" thành công!` });
+        res.json({ status: 'success', message: 'Đã gộp dữ liệu thành công! Ứng dụng hiện tại vẫn được giữ nguyên.' });
 
     } catch (e) {
-        console.error(e);
-        res.status(500).json({ status: 'error', message: "Lỗi import: " + e.message });
+        console.error("Lỗi Import Merge:", e);
+        res.status(500).json({ status: 'error', message: "Lỗi Server: " + e.message });
     }
 });
 
