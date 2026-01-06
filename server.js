@@ -375,10 +375,10 @@ app.post('/api/import-app', upload.single('file'), (req, res) => {
         const zip = new AdmZip(req.file.buffer);
         const zipEntries = zip.getEntries(); // Lấy danh sách file trong zip
 
-        // 2. Tìm file config.json để lấy thông tin app
-        const configFile = zipEntries.find(entry => entry.entryName === "config.json");
+        // 2. Tìm file apps.json để lấy thông tin app
+        const configFile = zipEntries.find(entry => entry.entryName === "apps.json");
         if (!configFile) {
-            return res.json({ status: 'error', message: 'File ZIP không hợp lệ (thiếu config.json)' });
+            return res.json({ status: 'error', message: 'File ZIP không hợp lệ (thiếu apps.json)' });
         }
 
         // Parse dữ liệu cấu hình
