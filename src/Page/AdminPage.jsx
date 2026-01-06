@@ -566,7 +566,33 @@ const AdminPage = () => {
                                             {(Array.isArray(q.refImage) ? q.refImage : []).map((imgUrl, i) => (
                                                 <div key={i} className="relative w-14 h-14 rounded-lg border bg-slate-100 group/img overflow-hidden">
                                                     <img src={imgUrl} alt="ref" className="w-full h-full object-cover"/>
-                                                    <button onClick={() => { const newQs = [...editingApp.questions]; const currentImgs = newQs[idx].refImage; newQs[idx].refImage = currentImgs.filter(url => url !== imgUrl); setEditingApp({ ...editingApp, questions: newQs }); }} className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity"><Trash2 size={16}/></button>
+                                                    <button 
+                                                        onClick={async () => { 
+                                                            if(!confirm("Bạn có chắc muốn xóa vĩnh viễn ảnh này khỏi Server?")) return;
+
+                                                            // 1. Gọi API xóa file gốc trên Server trước
+                                                            try {
+                                                                await fetch(`${BACKEND_URL}/delete-image`, {
+                                                                    method: 'POST',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({ imageUrl: imgUrl })
+                                                                });
+                                                            } catch (err) {
+                                                                console.error("Lỗi gọi API xóa ảnh", err);
+                                                                // Vẫn cho phép xóa UI nếu lỗi mạng để đỡ kẹt
+                                                            }
+
+                                                            // 2. Sau đó mới xóa link trên Giao diện (UI)
+                                                            const newQs = [...editingApp.questions]; 
+                                                            const currentImgs = newQs[idx].refImage; 
+                                                            newQs[idx].refImage = currentImgs.filter(url => url !== imgUrl); 
+                                                            setEditingApp({ ...editingApp, questions: newQs }); 
+                                                        }} 
+                                                        className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity"
+                                                        title="Xóa ảnh vĩnh viễn"
+                                                    >
+                                                        <Trash2 size={16}/>
+                                                    </button>
                                                 </div>
                                             ))}
                                             <label className="w-14 h-14 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 hover:border-blue-400 text-slate-400 hover:text-blue-500 transition-all">

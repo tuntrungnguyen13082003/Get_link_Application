@@ -217,29 +217,6 @@ app.get('/api/apps', (req, res) => {
 });
 
 // --- 10. API: LƯU ỨNG DỤNG (Thêm mới / Cập nhật) ---
-// app.post('/api/save-app', (req, res) => {
-//     try {
-//         const newApp = req.body;
-//         // Đọc file cũ
-//         let apps = [];
-//         if (fs.existsSync(APPS_PATH)) {
-//             apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
-//         }
-        
-//         // Kiểm tra xem ID đã có chưa để update hay push mới
-//         const index = apps.findIndex(a => a.sheetName === newApp.sheetName);
-//         if (index !== -1) {
-//             apps[index] = newApp; // Cập nhật
-//         } else {
-//             apps.push(newApp); // Thêm mới
-//         }
-
-//         fs.writeFileSync(APPS_PATH, JSON.stringify(apps, null, 2));
-//         res.json({ status: 'success', message: 'Đã lưu cấu hình ứng dụng!' });
-//     } catch (e) {
-//         res.status(500).json({ status: 'error', message: 'Lỗi lưu dữ liệu: ' + e.message });
-//     }
-// });
 app.post('/api/save-app', (req, res) => {
     try {
         // Nhận thêm biến oldSheetName từ Frontend gửi lên
@@ -348,6 +325,41 @@ app.post('/api/admin/delete-sheet', (req, res) => {
         fs.writeFileSync(DB_PATH, JSON.stringify(newDb, null, 2));
         res.json({ status: 'success', message: `Đã xóa sạch dữ liệu của ${sheetName}!` });
     } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
+// --- 16. API: XÓA FILE ẢNH VẬT LÝ ---
+app.post('/api/delete-image', (req, res) => {
+    try {
+        const { imageUrl } = req.body;
+        if (!imageUrl) return res.status(400).json({ status: 'error', message: 'Thiếu URL ảnh' });
+
+        // Logic: Lấy phần đuôi sau chữ '/uploads/'
+        // VD: http://...:17004/uploads/config_images/SOLAR/img_123.jpg 
+        // -> config_images/SOLAR/img_123.jpg
+        const parts = imageUrl.split('/uploads/');
+        
+        if (parts.length < 2) {
+             return res.json({ status: 'error', message: 'URL không thuộc folder uploads' });
+        }
+
+        const relativePath = parts[1]; // Lấy phần đường dẫn tương đối
+        const fullPath = path.join(__dirname, 'uploads', relativePath); // Ghép thành đường dẫn tuyệt đối
+
+        // Kiểm tra và xóa file
+        if (fs.existsSync(fullPath)) {
+            fs.unlinkSync(fullPath); // Lệnh xóa file của Node.js
+            console.log(`🗑️ Đã xóa file: ${fullPath}`);
+            res.json({ status: 'success', message: 'Đã xóa ảnh gốc thành công!' });
+        } else {
+            console.log(`⚠️ File không tồn tại: ${fullPath}`);
+            // Vẫn trả về success để Frontend xóa link đi cho sạch
+            res.json({ status: 'success', message: 'File không tồn tại (đã bị xóa trước đó)' });
+        }
+
+    } catch (e) {
+        console.error("Lỗi xóa ảnh:", e);
+        res.status(500).json({ status: 'error', message: e.message });
+    }
 });
 
 const PORT = process.env.PORT;
