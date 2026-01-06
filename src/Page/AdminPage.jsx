@@ -132,6 +132,9 @@ const AdminPage = () => {
     try {
         const res = await fetch(`${BACKEND_URL}/apps`);
         const json = await res.json();
+
+        console.log("Dữ liệu Apps nhận được:", json);
+ 
         if (json.status === 'success') {
             setApps(json.data);
             // Auto chọn app đầu tiên cho tab Link
