@@ -4,10 +4,6 @@ import { Lock, LogOut, UserPlus, Settings, Trash2, Shield, User, Key, Link as Li
 // 👇 Import file dashboard
 import AdminDashboard from '../components/AdminDashboard';
 
-const APP_ICONS = [
-    "📝", "📸", "⚠️", "⚡", "🔧", "🧯", "🏭", "🔋", "✅", "🚒", "🏗️", "🔌", "💧", "🚲", "🚗", "🛡️"
-];
-
 const AdminPage = () => {
   const BACKEND_URL = import.meta.env.VITE_API_URL; 
   
