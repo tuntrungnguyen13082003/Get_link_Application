@@ -461,10 +461,6 @@ app.post('/api/import-app', upload.single('file'), (req, res) => {
     }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ Backend Server đang chạy tại cổng ${PORT} (ES Module mode)`);
-});
-
 // --- 4. API: ĐĂNG NHẬP ---
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
@@ -546,4 +542,6 @@ app.post('/api/delete-user', (req, res) => {
 });
 
 
-
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Backend Server đang chạy tại cổng ${PORT} (ES Module mode)`);
+});
