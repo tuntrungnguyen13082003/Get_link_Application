@@ -236,6 +236,13 @@ const AdminPage = () => {
     }
   };
 
+  const handleBackupSystem = () => {
+    if (confirm("Bạn muốn tải về bản SAO LƯU TOÀN BỘ hệ thống (Dữ liệu + Hình ảnh)?")) {
+        // Gọi API tải file zip
+        window.location.href = `${BACKEND_URL}/export-all-apps`;
+    }
+  };
+
   const handleUploadImage = async (qIndex, e) => {
     const file = e.target.files[0];
     if (!file || !editingApp.sheetName) return alert("Chọn file và nhập Sheet Name trước!");
@@ -408,6 +415,12 @@ const AdminPage = () => {
         {activeTab === 'builder' && currentUser.role === 'admin' && (
             <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in">
                 {/* Sidebar List */}
+                <button 
+                    onClick={handleBackupSystem} 
+                    className="w-full bg-orange-100 text-orange-700 border border-orange-200 py-3 rounded-xl font-bold hover:bg-orange-200 mb-3 flex items-center justify-center gap-2 transition-colors"
+                >
+                    <FileDown size={20}/> BACKUP TỔNG
+                </button>
                 <div className="w-full lg:w-1/4 bg-white p-4 rounded-2xl shadow-lg border border-slate-200 h-fit">
                     <button onClick={handleNewApp} className="w-full bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 mb-4 flex items-center justify-center gap-2">
                         <Plus size={18}/> THÊM ỨNG DỤNG
@@ -448,7 +461,7 @@ const AdminPage = () => {
                                                 onClick={() => fileInputRef.current.click()}
                                                 className="bg-white text-slate-600 border border-slate-300 px-4 py-2 rounded-xl font-bold hover:bg-slate-50 flex items-center gap-2 shadow-sm transition-all"
                                             >
-                                                <FileUp size={18}/> Import Backup
+                                                <FileUp size={18}/> Import
                                             </button>
                                         </>
                                     )}

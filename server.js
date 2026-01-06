@@ -461,6 +461,40 @@ app.post('/api/import-app', upload.single('file'), (req, res) => {
     }
 });
 
+// --- 15. API: BACKUP TOÀN BỘ HỆ THỐNG (FULL BACKUP) ---
+app.get('/api/export-all-apps', (req, res) => {
+    try {
+        console.log("Đang tạo bản backup tổng thể...");
+        const zip = new AdmZip();
+
+        // 1. Thêm file dữ liệu apps.json
+        if (fs.existsSync(APPS_PATH)) {
+            const appsData = fs.readFileSync(APPS_PATH, 'utf8');
+            zip.addFile("apps.json", Buffer.from(appsData, "utf8"));
+        }
+
+        // 2. Thêm toàn bộ thư mục ảnh (uploads/config_images)
+        if (fs.existsSync(CONFIG_IMAGES_DIR)) {
+            // Lưu vào thư mục tên là 'config_images' trong file zip
+            zip.addLocalFolder(CONFIG_IMAGES_DIR, "config_images");
+        }
+
+        // 3. Gửi file ZIP về client
+        const dateStr = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        const downloadName = `FULL_BACKUP_SYSTEM_${dateStr}.zip`;
+        const data = zip.toBuffer();
+        
+        res.set('Content-Type', 'application/zip');
+        res.set('Content-Disposition', `attachment; filename=${downloadName}`);
+        res.set('Content-Length', data.length);
+        res.send(data);
+
+    } catch (e) {
+        console.error("Lỗi Backup All:", e);
+        res.status(500).send("Lỗi Server khi tạo backup: " + e.message);
+    }
+});
+
 // --- 4. API: ĐĂNG NHẬP ---
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
