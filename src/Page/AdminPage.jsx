@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // 👇 Thêm 'Database' vào dòng import này
-import { Lock, LogOut, UserPlus, Settings, Trash2, Shield, User, Key, Link as LinkIcon, Plus, Save, Image as ImageIcon, X, LayoutGrid, Database } from 'lucide-react';
+import { Lock, LogOut, UserPlus, Settings, Trash2, Shield, User, Key, Link as LinkIcon, Plus, Save, Image as ImageIcon, X, LayoutGrid, Database, FileUp, FileDown } from 'lucide-react';
 // 👇 Import file dashboard
 import AdminDashboard from '../components/AdminDashboard';
 
@@ -12,6 +12,8 @@ const AdminPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   
+  const fileInputRef = React.useRef(null);
+
   // State Tạo Link
   const [selectedAppId, setSelectedAppId] = useState(''); // Sửa nhẹ: Lưu ID thay vì Object để dễ xử lý
   const [code, setCode] = useState('');
@@ -188,6 +190,47 @@ const AdminPage = () => {
       if (editingApp?.sheetName === sheetName) setEditingApp(null);
       
     } catch (e) { alert("Lỗi xóa app!"); }
+  };
+
+  // --- HÀM MỚI: XỬ LÝ EXPORT & IMPORT ---
+  const handleExportApp = () => {
+    if (!editingApp?.sheetName) return alert("Chưa có ứng dụng để xuất!");
+    if (confirm(`Tải về bản sao lưu của "${editingApp.name}"?`)) {
+       // Gọi thẳng link API để trình duyệt tải file
+       window.location.href = `${BACKEND_URL}/api/export-app/${editingApp.sheetName}`;
+    }
+  };
+
+  const handleImportFile = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Reset input để chọn lại file cũ vẫn nhận
+    e.target.value = null;
+
+    if (!confirm("Dữ liệu từ file Backup sẽ được thêm vào hệ thống. Bạn có chắc chắn?")) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/import-app`, {
+        method: 'POST',
+        body: formData
+      });
+      const json = await res.json();
+      
+      if (json.status === 'success') {
+         alert("✅ " + json.message);
+         fetchApps(); // Tải lại danh sách để thấy app mới import
+         // Tùy chọn: Reset form về trạng thái tạo mới
+         handleNewApp(); 
+      } else {
+         alert("❌ Lỗi Import: " + json.message);
+      }
+    } catch (err) {
+      alert("Lỗi kết nối Server khi Import!");
+    }
   };
 
   const handleUploadImage = async (qIndex, e) => {
@@ -393,9 +436,35 @@ const AdminPage = () => {
                                 <h2 className="text-xl font-bold text-slate-700 flex items-center gap-2">
                                     ✏️ Chỉnh sửa: <span className="text-blue-600">{editingApp.name}</span>
                                 </h2>
-                                <button onClick={handleSaveApp} disabled={isSavingApp} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 flex items-center gap-2 shadow transition-all active:scale-95">
-                                    {isSavingApp ? "⏳ Đang lưu..." : <><Save size={18}/> LƯU CẤU HÌNH</>}
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    {/* 1. NÚT IMPORT (Hiện khi tạo mới) */}
+                                    {!editingApp.sheetName && (
+                                        <>
+                                            <input type="file" ref={fileInputRef} onChange={handleImportFile} className="hidden" accept=".zip" />
+                                            <button 
+                                                onClick={() => fileInputRef.current.click()}
+                                                className="bg-white text-slate-600 border border-slate-300 px-4 py-2 rounded-xl font-bold hover:bg-slate-50 flex items-center gap-2 shadow-sm transition-all"
+                                            >
+                                                <FileUp size={18}/> Import Backup
+                                            </button>
+                                        </>
+                                    )}
+
+                                    {/* 2. NÚT EXPORT (Hiện khi đang sửa) */}
+                                    {editingApp.sheetName && (
+                                        <button 
+                                            onClick={handleExportApp}
+                                            className="bg-amber-100 text-amber-700 border border-amber-200 px-4 py-2 rounded-xl font-bold hover:bg-amber-200 flex items-center gap-2 shadow-sm transition-all"
+                                        >
+                                            <FileDown size={18}/> Backup
+                                        </button>
+                                    )}
+
+                                    {/* 3. NÚT LƯU (Cũ) */}
+                                    <button onClick={handleSaveApp} disabled={isSavingApp} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 flex items-center gap-2 shadow transition-all active:scale-95">
+                                        {isSavingApp ? "⏳ Đang lưu..." : <><Save size={18}/> LƯU CẤU HÌNH</>}
+                                    </button>
+                                </div>
                             </div>
                             
                             {/* --- DÒNG 1: CẤU HÌNH CƠ BẢN (FOLDER & TÊN APP) --- */}

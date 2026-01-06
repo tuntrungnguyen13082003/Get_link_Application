@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import AdmZip from 'adm-zip';
 
 const app = express();
 app.use(cors());
@@ -350,6 +351,115 @@ app.post('/api/admin/delete-sheet', (req, res) => {
 });
 
 const PORT = process.env.PORT;
+
+// --- 13. API: EXPORT ỨNG DỤNG (TẠO FILE BACKUP ZIP) ---
+app.get('/api/export-app/:sheetName', (req, res) => {
+    try {
+        const { sheetName } = req.params;
+
+        // 1. Tìm thông tin ứng dụng trong apps.json
+        const apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
+        const targetApp = apps.find(a => a.sheetName === sheetName);
+
+        if (!targetApp) return res.status(404).send('Không tìm thấy ứng dụng!');
+
+        // 2. Khởi tạo file ZIP
+        const zip = new AdmZip();
+
+        // 3. Thêm file cấu hình (config.json) vào ZIP
+        // Đây chính là thông tin câu hỏi, tên app, mô tả...
+        zip.addFile("config.json", Buffer.from(JSON.stringify(targetApp, null, 2), "utf8"));
+
+        // 4. Tìm và thêm các ảnh minh họa vào ZIP
+        // Giả sử ảnh được lưu trong folder: uploads/config_images/{sheetName}/
+        const appImageFolder = path.join(CONFIG_IMAGES_DIR, sheetName);
+        
+        if (fs.existsSync(appImageFolder)) {
+            // Thêm toàn bộ folder ảnh của app này vào ZIP dưới tên "ref_images"
+            zip.addLocalFolder(appImageFolder, "ref_images");
+        }
+
+        // 5. Trả file ZIP về cho trình duyệt tải xuống
+        const downloadName = `${sheetName}_backup_${Date.now()}.zip`;
+        const data = zip.toBuffer();
+        
+        res.set('Content-Type', 'application/zip');
+        res.set('Content-Disposition', `attachment; filename=${downloadName}`);
+        res.set('Content-Length', data.length);
+        res.send(data);
+
+    } catch (e) {
+        console.error(e);
+        res.status(500).send("Lỗi tạo file backup: " + e.message);
+    }
+});
+
+// --- 14. API: IMPORT ỨNG DỤNG (KHÔI PHỤC TỪ ZIP) ---
+// Sử dụng upload.single('file') để nhận file zip
+app.post('/api/import-app', upload.single('file'), (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ status: 'error', message: 'Chưa gửi file ZIP' });
+
+        // 1. Đọc file ZIP từ bộ nhớ (Buffer)
+        const zip = new AdmZip(req.file.buffer);
+        const zipEntries = zip.getEntries(); // Lấy danh sách file trong zip
+
+        // 2. Tìm file config.json để lấy thông tin app
+        const configFile = zipEntries.find(entry => entry.entryName === "config.json");
+        if (!configFile) {
+            return res.json({ status: 'error', message: 'File ZIP không hợp lệ (thiếu config.json)' });
+        }
+
+        // Parse dữ liệu cấu hình
+        const appData = JSON.parse(configFile.getData().toString("utf8"));
+        const sheetName = appData.sheetName; // Lấy ID app (VD: SOLAR)
+
+        if (!sheetName) return res.json({ status: 'error', message: 'File cấu hình lỗi (thiếu sheetName)' });
+
+        // 3. Cập nhật vào apps.json
+        let apps = [];
+        if (fs.existsSync(APPS_PATH)) {
+            apps = JSON.parse(fs.readFileSync(APPS_PATH, 'utf8'));
+        }
+
+        // Kiểm tra xem đã tồn tại chưa
+        const index = apps.findIndex(a => a.sheetName === sheetName);
+        if (index !== -1) {
+            // Nếu có rồi -> Ghi đè (Update)
+            apps[index] = appData;
+        } else {
+            // Nếu chưa có -> Thêm mới
+            apps.push(appData);
+        }
+        fs.writeFileSync(APPS_PATH, JSON.stringify(apps, null, 2));
+
+        // 4. Giải nén ảnh vào folder uploads/config_images/{sheetName}
+        // Folder đích trên server
+        const targetImgFolder = path.join(CONFIG_IMAGES_DIR, sheetName);
+        
+        // Tạo folder nếu chưa có
+        if (!fs.existsSync(targetImgFolder)) {
+            fs.mkdirSync(targetImgFolder, { recursive: true });
+        }
+
+        // Duyệt qua các file trong ZIP để tìm ảnh trong folder "ref_images/"
+        zipEntries.forEach(entry => {
+            // Nếu file nằm trong folder ref_images và không phải là folder
+            if (entry.entryName.startsWith("ref_images/") && !entry.isDirectory) {
+                const fileName = path.basename(entry.entryName); // Lấy tên file gốc (vd: q1.jpg)
+                
+                // Giải nén file đó vào đích
+                zip.extractEntryTo(entry, targetImgFolder, false, true);
+            }
+        });
+
+        res.json({ status: 'success', message: `Đã khôi phục ứng dụng "${appData.name}" thành công!` });
+
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ status: 'error', message: "Lỗi import: " + e.message });
+    }
+});
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Backend Server đang chạy tại cổng ${PORT} (ES Module mode)`);
