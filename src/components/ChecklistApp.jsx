@@ -183,7 +183,7 @@ return (
         <div className="bg-white px-6 py-4 border-b border-gray-100 z-20">
             <div className="flex items-center justify-between mb-3">
                 <h2 className="font-bold text-gray-800 text-lg truncate pr-2">
-                    Câu {currentStep + 1}: {currentQ.title}
+                    B{currentStep + 1}: {currentQ.title}
                 </h2>
                 <span className={`text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap ${hasCaptured ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                     {hasCaptured ? 'Đã xong' : 'Chưa chụp'}
