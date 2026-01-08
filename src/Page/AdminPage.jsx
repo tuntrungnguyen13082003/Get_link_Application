@@ -360,11 +360,10 @@ const AdminPage = () => {
                 </button>
             )}
 
-            {currentUser.role === 'admin' && (
+            
                 <button onClick={() => setActiveTab('database')} className={`px-6 py-3 font-bold rounded-t-xl transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'database' ? 'bg-purple-700 text-white shadow-lg' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>
                     <Database size={18}/> KHO DỮ LIỆU
                 </button>
-            )}
 
             <button onClick={() => setActiveTab('settings')} className={`px-6 py-3 font-bold rounded-t-xl transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'settings' ? 'bg-orange-600 text-white shadow-lg' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>
                 <Settings size={18}/> CÀI ĐẶT & USER
@@ -606,9 +605,9 @@ const AdminPage = () => {
         )}
 
         {/* === TAB 3: KHO DỮ LIỆU (MỚI) === */}
-        {activeTab === 'database' && currentUser.role === 'admin' && (
+        {activeTab === 'database' && (
             <div className="max-w-7xl mx-auto animate-in fade-in">
-                <AdminDashboard currentUser={currentUser.username} apps={apps} />
+                <AdminDashboard currentUser={currentUser} apps={apps} />
             </div>
         )}
 

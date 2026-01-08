@@ -3,6 +3,7 @@ import { Trash2, FileText, ExternalLink, ShieldAlert, FolderOpen, Copy, Check } 
 
 const AdminDashboard = ({ currentUser, apps }) => {
     // 👇 Sửa đúng IP/Port Server của bạn
+    const isAdmin = currentUser?.role === 'admin';
     const API_URL = import.meta.env.VITE_API_URL; 
     
     const [groupedData, setGroupedData] = useState({});
@@ -137,9 +138,11 @@ const AdminDashboard = ({ currentUser, apps }) => {
                             </button>
 
                             {/* Nút Xóa Sheet */}
+                            {isAdmin && (
                             <button onClick={handleDeleteSheet} className="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors border border-red-200">
                                 <Trash2 size={18}/> Xóa toàn bộ Sheet
                             </button>
+                            )}
                         </div>
 
                         <div className="overflow-x-auto border border-slate-200 rounded-xl">
@@ -190,9 +193,11 @@ const AdminDashboard = ({ currentUser, apps }) => {
                                                 </td>
 
                                                 <td className="p-4 text-center">
+                                                    {isAdmin && (
                                                     <button onClick={() => handleDeleteRow(row.token)} className="text-slate-400 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition-all">
                                                         <Trash2 size={18}/>
                                                     </button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         );
