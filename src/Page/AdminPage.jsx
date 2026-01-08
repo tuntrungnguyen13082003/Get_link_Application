@@ -257,6 +257,17 @@ const AdminPage = () => {
       }
     } catch (err) { alert("Lỗi upload ảnh!"); }
   };
+  // TỰ ĐỘNG SẮP XẾP LẠI THỨ TỰ CÂU HỎI ---
+  const sortQuestions = () => {
+    // 1. Copy ra mảng mới
+    const sortedQs = [...editingApp.questions];
+    
+    // 2. Sắp xếp tăng dần theo ID
+    sortedQs.sort((a, b) => a.id - b.id);
+    
+    // 3. Cập nhật lại State để giao diện tự nhảy lại vị trí đúng
+    setEditingApp({ ...editingApp, questions: sortedQs });
+  };
 
   // --- 3. LOGIC TẠO LINK (ĐÃ CẬP NHẬT DÙNG DỮ LIỆU ĐỘNG) ---
   const handleCopy = (text) => {
@@ -538,6 +549,7 @@ const AdminPage = () => {
                                             <div className="flex flex-col items-center gap-1">
                                                 <span className="text-[10px] font-bold text-slate-400 uppercase">STT</span>
                                                 <input type="number" className="w-12 p-2 border rounded-lg text-center font-bold bg-slate-50" value={q.id} onChange={(e) => { const newQs = [...editingApp.questions]; newQs[idx].id = parseInt(e.target.value); setEditingApp({...editingApp, questions: newQs}); }}/>
+                                                onBlur={sortQuestions}
                                             </div>
                                             <div className="flex-1">
                                                 <span className="text-[10px] font-bold text-slate-400 uppercase">Nội dung câu hỏi</span>
