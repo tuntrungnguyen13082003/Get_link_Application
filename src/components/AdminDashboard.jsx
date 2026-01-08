@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Trash2, FileText, ExternalLink, ShieldAlert, FolderOpen, Copy, Check } from 'lucide-react';
 
-const AdminDashboard = ({ currentUser, apps }) => {
+const AdminDashboard = ({ currentUser, isAdmin, apps }) => {
     // 👇 Sửa đúng IP/Port Server của bạn
-    const isAdmin = currentUser?.role === 'admin';
     const API_URL = import.meta.env.VITE_API_URL; 
     
     const [groupedData, setGroupedData] = useState({});

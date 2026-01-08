@@ -607,7 +607,7 @@ const AdminPage = () => {
         {/* === TAB 3: KHO DỮ LIỆU (MỚI) === */}
         {activeTab === 'database' && (
             <div className="max-w-7xl mx-auto animate-in fade-in">
-                <AdminDashboard currentUser={currentUser} apps={apps} />
+                <AdminDashboard currentUser={currentUser.username} isAdmin={currentUser.role === 'admin'} apps={apps} />
             </div>
         )}
 
