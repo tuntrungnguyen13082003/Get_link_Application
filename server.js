@@ -278,38 +278,21 @@ app.post('/api/delete-app', (req, res) => {
 });
 
 // --- 12. API: UPLOAD ẢNH MINH HỌA (Đã nâng cấp chia folder) ---
-app.post('/api/upload-config-image', uploadConfig.single('image'), (req, res) => {
-    try {
-        if (!req.file) return res.status(400).json({ status: 'error', message: 'Chưa có file' });
-        
-        // Lấy appId để trả về đường dẫn đúng
-        const appId = req.query.appId || 'common';
-
-        // Trả về đường dẫn đầy đủ để Frontend hiển thị
-        const protocol = req.protocol;
-        const host = req.get('host');
-        const imageUrl = `${protocol}://${host}/uploads/config_images/${appId}/${req.file.filename}`;
-        
-        res.json({ status: 'success', url: imageUrl });
-    } catch (error) {
-        res.status(500).json({ status: 'error', message: error.message });
-    }
-});
-
-// --- 1. API: LẤY DỮ LIỆU BÁO CÁO (Cần gửi kèm username admin để bảo mật) ---
 app.post('/api/admin/reports', (req, res) => {
     try {
-        const { requester } = req.body;
-        // Kiểm tra quyền Admin (Code cũ bạn có rồi, tôi viết tắt đoạn này)
-        const users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf8'));
-        const isAdmin = users.find(u => u.username === requester && u.role === 'admin');
+        // 👇 KHÔNG CẦN KIỂM TRA QUYỀN Ở ĐÂY NỮA
+        // (Vì bên Frontend mình đã ẩn nút Xóa với nhân viên rồi, nên cho họ xem thoải mái)
         
-        if (!isAdmin) return res.status(403).json({ status: 'error', message: 'Cấm truy cập!' });
-
-        if (!fs.existsSync(DB_PATH)) return res.json({ status: 'success', data: [] });
+        if (!fs.existsSync(DB_PATH)) {
+            return res.json({ status: 'success', data: [] });
+        }
+        
         const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
         res.json({ status: 'success', data: db });
-    } catch (e) { res.status(500).json({ message: e.message }); }
+
+    } catch (e) { 
+        res.status(500).json({ message: e.message }); 
+    }
 });
 
 // --- 2. API: XÓA 1 DÒNG (Theo Token) ---
