@@ -182,7 +182,7 @@ return (
       <div className="w-full max-w-md bg-white md:rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[100vh] md:h-[90vh] relative border border-gray-200">
         <div className="bg-white px-6 py-4 border-b border-gray-100 z-20">
             <div className="flex items-center justify-between mb-3">
-                <h2 className="font-bold text-gray-800 text-lg truncate pr-2">
+                <h2 className="font-bold text-gray-800 text-lg whitespace-normal break-words flex-1 pr-2">
                     B{currentStep + 1}: {currentQ.title}
                 </h2>
                 <span className={`text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap ${hasCaptured ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
