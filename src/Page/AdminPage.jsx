@@ -548,8 +548,9 @@ const AdminPage = () => {
                                         <div className="flex gap-3 mb-2 pr-8">
                                             <div className="flex flex-col items-center gap-1">
                                                 <span className="text-[10px] font-bold text-slate-400 uppercase">STT</span>
-                                                <input type="number" className="w-12 p-2 border rounded-lg text-center font-bold bg-slate-50" value={q.id} onChange={(e) => { const newQs = [...editingApp.questions]; newQs[idx].id = parseInt(e.target.value); setEditingApp({...editingApp, questions: newQs}); }}/>
+                                                <input type="number" className="w-12 p-2 border rounded-lg text-center font-bold bg-slate-50" value={q.id} onChange={(e) => { const newQs = [...editingApp.questions]; newQs[idx].id = parseInt(e.target.value); setEditingApp({...editingApp, questions: newQs}); }}
                                                 onBlur={sortQuestions}
+                                                />
                                             </div>
                                             <div className="flex-1">
                                                 <span className="text-[10px] font-bold text-slate-400 uppercase">Nội dung câu hỏi</span>
