@@ -277,22 +277,40 @@ app.post('/api/delete-app', (req, res) => {
     }
 });
 
-// --- 12. API: UPLOAD ẢNH MINH HỌA (Đã nâng cấp chia folder) ---
-app.post('/api/admin/reports', (req, res) => {
-    try {
-        // 👇 KHÔNG CẦN KIỂM TRA QUYỀN Ở ĐÂY NỮA
-        // (Vì bên Frontend mình đã ẩn nút Xóa với nhân viên rồi, nên cho họ xem thoải mái)
-        
-        if (!fs.existsSync(DB_PATH)) {
-            return res.json({ status: 'success', data: [] });
-        }
-        
-        const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-        res.json({ status: 'success', data: db });
+// --- 12. API: UPLOAD ẢNH MINH HỌA (Đã sửa để bắt lỗi Multer) ---
+app.post('/api/upload-config-image', (req, res) => {
+    // 1. Gọi hàm upload thủ công để bắt lỗi
+    const upload = uploadConfig.single('image');
 
-    } catch (e) { 
-        res.status(500).json({ message: e.message }); 
-    }
+    upload(req, res, function (err) {
+        // A. Nếu lỗi xảy ra ngay lúc Multer đang lưu file (Lỗi Permission, Lỗi tạo folder...)
+        if (err) {
+            console.error("🔴 LỖI MULTER:", err); // Hiện lỗi đỏ lòm trong Terminal Server
+            return res.status(500).json({ 
+                status: 'error', 
+                message: "Lỗi Server khi lưu file: " + err.message 
+            });
+        }
+
+        // B. Nếu Multer chạy ngon lành, giờ mới chạy code của bạn
+        try {
+            if (!req.file) return res.status(400).json({ status: 'error', message: 'Chưa có file nào được gửi lên' });
+            
+            const appId = req.query.appId || 'common';
+            const protocol = req.protocol;
+            const host = req.get('host');
+            
+            // Trả về đường dẫn ảnh
+            const imageUrl = `${protocol}://${host}/uploads/config_images/${appId}/${req.file.filename}`;
+            
+            console.log("✅ Upload thành công:", imageUrl);
+            res.json({ status: 'success', url: imageUrl });
+
+        } catch (error) {
+            console.error("Lỗi logic sau upload:", error);
+            res.status(500).json({ status: 'error', message: error.message });
+        }
+    });
 });
 
 // --- 2. API: XÓA 1 DÒNG (Theo Token) ---
