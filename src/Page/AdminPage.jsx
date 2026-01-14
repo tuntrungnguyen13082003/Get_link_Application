@@ -243,20 +243,45 @@ const AdminPage = () => {
 
   const handleUploadImage = async (qIndex, e) => {
     const file = e.target.files[0];
-    if (!file || !editingApp.sheetName) return alert("Chọn file và nhập Sheet Name trước!");
+    if (!file || !editingApp.sheetName) return alert("Chọn file và nhập Mã hệ thống (Folder) trước!");
+    
     const formData = new FormData();
     formData.append('image', file);
+    
     try {
-      const res = await fetch(`${BACKEND_URL}/upload-config-image?appId=${editingApp.sheetName}`, { method: 'POST', body: formData });
+      console.log("Đang upload ảnh vào folder:", editingApp.sheetName);
+      
+      const res = await fetch(`${BACKEND_URL}/upload-config-image?appId=${editingApp.sheetName}`, { 
+          method: 'POST', 
+          body: formData 
+      });
+
+      // Kiểm tra xem server có trả về JSON không
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+          // Nếu server trả về HTML lỗi (thường do crash)
+          const text = await res.text(); 
+          console.error("Server trả về lỗi HTML:", text);
+          throw new Error("Server bị lỗi nội bộ (Check Terminal)");
+      }
+
       const json = await res.json();
+      
       if (json.status === 'success') {
         const newQs = [...editingApp.questions];
         const currentImgs = Array.isArray(newQs[qIndex].refImage) ? newQs[qIndex].refImage : [];
         newQs[qIndex].refImage = [...currentImgs, json.url];
         setEditingApp({ ...editingApp, questions: newQs });
+      } else {
+        alert("❌ Server báo lỗi: " + json.message);
       }
-    } catch (err) { alert("Lỗi upload ảnh!"); }
+
+    } catch (err) { 
+        console.error(err);
+        alert("Lỗi upload: " + err.message); 
+    }
   };
+  
   // TỰ ĐỘNG SẮP XẾP LẠI THỨ TỰ CÂU HỎI ---
   const sortQuestions = () => {
     // 1. Copy ra mảng mới
