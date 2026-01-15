@@ -313,6 +313,23 @@ app.post('/api/upload-config-image', (req, res) => {
     });
 });
 
+// --- 13. API: LẤY DỮ LIỆU BÁO CÁO (Kho dữ liệu) ---
+app.post('/api/admin/reports', (req, res) => {
+    try {
+        // Kiểm tra xem file database có tồn tại không
+        if (!fs.existsSync(DB_PATH)) {
+            return res.json({ status: 'success', data: [] });
+        }
+        
+        // Đọc dữ liệu và trả về cho Frontend
+        const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+        res.json({ status: 'success', data: db });
+
+    } catch (e) { 
+        res.status(500).json({ message: e.message }); 
+    }
+});
+
 // --- 2. API: XÓA 1 DÒNG (Theo Token) ---
 app.post('/api/admin/delete-record', (req, res) => {
     try {
